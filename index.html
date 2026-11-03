@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FBEFF1">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Esprit Léger">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script>if('serviceWorker' in navigator&&location.protocol!=='file:'){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+<title>Esprit Léger · Mental Load Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F8F2EE; --bg2:#F1E6E0; --card:#FFFDFB; --plum:#4A2C3D; --plum2:#6B4257;
+  --rose:#E8A5B4; --rose-soft:#F8DDE3; --rose-deep:#C9748A; --sage:#9FB4A0; --sage-soft:#E3EBE2;
+  --gold:#C8A27C; --ink:#3A2A33; --muted:#8C7B83; --line:#EBDDD6;
+  --shadow:0 10px 30px -12px rgba(74,44,61,.22); --r:22px;
+  --serif:'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --sans:'Jost', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg)}
+body{font-family:var(--sans);color:var(--ink);font-size:15px;line-height:1.5;min-height:100vh;
+  background:radial-gradient(120% 60% at 100% 0%,#F6E1E6 0%,rgba(246,225,230,0) 60%),radial-gradient(90% 50% at 0% 100%,#E6EDE4 0%,rgba(230,237,228,0) 60%),var(--bg);
+  background-attachment:fixed;padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit}
+input,textarea,select{font-family:inherit;font-size:16px;color:var(--ink)}
+
+/* SPLASH */
+#splash{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:radial-gradient(circle at 50% 30%,#FFFFFF 0%,#FBEFF1 38%,#F3D9DF 75%,#EBC7D0 100%);color:var(--plum);text-align:center;
+  animation:spOut .7s ease 2s forwards}
+#splash.hide{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .5s,visibility .5s}
+@keyframes spOut{to{opacity:0;visibility:hidden;pointer-events:none}}
+.sp-in{animation:spIn 1s ease both}
+@keyframes spIn{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+.sp-logo{width:108px;height:108px;margin:0 auto 22px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:#FFFDFB;box-shadow:0 0 0 1px rgba(200,162,124,.55),0 14px 40px -10px rgba(201,116,138,.55);animation:glow 2s ease-in-out infinite alternate}
+@keyframes glow{to{box-shadow:0 0 0 1px rgba(200,162,124,.8),0 18px 60px -8px rgba(201,116,138,.75)}}
+.sp-logo svg{width:64px;height:64px}
+#splash .sp-ar{font-family:'Amiri','Scheherazade New','Noto Naskh Arabic',serif;font-size:30px;font-weight:700;color:var(--rose-deep);line-height:1.3;direction:rtl;margin-bottom:2px}
+#splash h1{font-family:var(--serif);font-weight:700;font-size:48px;letter-spacing:.5px;line-height:1.05;color:var(--plum)}
+#splash .sp-en{margin-top:12px;font-size:12px;letter-spacing:4px;text-transform:uppercase;color:#9C7550;font-weight:500}
+.sp-bar{width:120px;height:3px;margin:28px auto 0;background:rgba(74,44,61,.12);border-radius:3px;overflow:hidden}
+.sp-bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--rose),var(--rose-deep));animation:load 1.9s ease forwards}
+@keyframes load{to{width:100%}}
+
+/* LAYOUT */
+.app{max-width:540px;margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) 16px 0}
+.view{display:none;animation:fade .45s ease}
+.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.eyebrow{font-size:11px;letter-spacing:2.6px;text-transform:uppercase;color:var(--rose-deep);font-weight:500}
+h1,h2,h3{font-family:var(--serif);color:var(--plum);font-weight:600;line-height:1.1}
+.hero{padding:14px 4px 18px}
+.hero h1{font-size:38px;margin-top:6px}
+.hero h1 em{font-style:italic;color:var(--rose-deep)}
+.sub{color:var(--muted);margin-top:8px;font-size:14.5px}
+.card{background:var(--card);border-radius:var(--r);padding:18px;margin-bottom:14px;box-shadow:var(--shadow);border:1px solid rgba(235,221,214,.7)}
+.c-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.c-head h2{font-size:22px}
+.pill{font-size:12px;padding:4px 10px;border-radius:20px;background:var(--rose-soft);color:var(--rose-deep);font-weight:500}
+.lbl{display:block;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+
+/* METER */
+.m-top{display:flex;justify-content:space-between;align-items:baseline}
+.m-top span{font-family:var(--serif);font-size:22px;color:var(--plum);font-weight:600}
+.m-top b{font-weight:500;color:var(--rose-deep);font-size:14px}
+.m-bar{height:10px;background:var(--bg2);border-radius:10px;margin:14px 0 10px;overflow:hidden}
+.m-bar span{display:block;height:100%;width:5%;border-radius:10px;background:linear-gradient(90deg,var(--sage),var(--rose),var(--rose-deep));transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.m-note{font-size:13.5px;color:var(--muted)}
+
+/* CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:10px 14px;border-radius:40px;background:var(--bg);border:1px solid var(--line);font-size:13.5px;transition:all .25s}
+.chip.on{background:linear-gradient(135deg,var(--rose),var(--rose-deep));color:#fff;border-color:transparent;box-shadow:0 6px 16px -6px rgba(201,116,138,.7);transform:translateY(-1px)}
+
+/* TILES */
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.tile{position:relative;text-align:start;background:var(--card);border-radius:20px;padding:16px;min-height:112px;box-shadow:var(--shadow);border:1px solid rgba(235,221,214,.7);display:flex;flex-direction:column;justify-content:space-between;transition:transform .2s}
+.tile:active{transform:scale(.97)}
+.tile.wide{grid-column:1/-1;background:linear-gradient(135deg,var(--plum) 0%,var(--plum2) 100%);color:#fff;min-height:100px}
+.tile.wide .t-name{color:#fff}
+.tile.wide .t-ico{background:rgba(255,255,255,.12)}
+.t-ico{width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--rose-soft);font-size:17px}
+.t-name{font-family:var(--serif);font-size:19px;font-weight:600;color:var(--plum);line-height:1.15;margin-top:10px}
+.t-cnt{position:absolute;top:14px;right:14px;font-size:12px;color:var(--muted)}
+.tile.wide .t-cnt{color:var(--gold)}
+.quote{text-align:center;background:linear-gradient(135deg,#FBEFF1,#F3F0EA)}
+.quote p{font-family:var(--serif);font-style:italic;font-size:20px;color:var(--plum);line-height:1.35}
+
+/* FIELDS */
+.field{width:100%;padding:13px 15px;border-radius:14px;border:1px solid var(--line);background:#fff;outline:none;transition:border .2s,box-shadow .2s}
+.field:focus{border-color:var(--rose);box-shadow:0 0 0 4px rgba(232,165,180,.18)}
+textarea.field{min-height:120px;resize:vertical;line-height:1.55}
+.add{display:flex;gap:8px}
+.add .field{flex:1}
+.btn{padding:13px 18px;border-radius:14px;font-weight:500;font-size:14.5px;transition:transform .15s,opacity .2s;white-space:nowrap}
+.btn:active{transform:scale(.96)}
+.btn.primary{background:linear-gradient(135deg,var(--plum),var(--plum2));color:#fff;box-shadow:0 8px 18px -8px rgba(74,44,61,.6)}
+.btn.rose{background:linear-gradient(135deg,var(--rose),var(--rose-deep));color:#fff}
+.btn.ghost{background:var(--bg);border:1px solid var(--line);color:var(--plum)}
+.btn.block{width:100%;margin-top:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.hint{font-size:13px;color:var(--muted);margin-top:10px}
+
+/* LIST */
+.list{list-style:none;margin-top:14px}
+.item{display:flex;align-items:flex-start;gap:12px;padding:13px 2px;border-bottom:1px solid var(--line);animation:fade .3s ease}
+.item:last-child{border-bottom:0}
+.chk{flex:none;width:26px;height:26px;border-radius:50%;border:1.6px solid var(--rose);display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .25s}
+.chk svg{width:14px;height:14px;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;opacity:0;transition:opacity .2s}
+.item.done .chk{background:linear-gradient(135deg,var(--rose),var(--rose-deep));border-color:transparent}
+.item.done .chk svg{opacity:1}
+.it-body{flex:1;min-width:0}
+.it-t{word-wrap:break-word;overflow-wrap:anywhere}
+.item.done .it-t{text-decoration:line-through;color:var(--muted)}
+.it-meta{font-size:12.5px;color:var(--sage);margin-top:3px;font-weight:500}
+.del{flex:none;width:28px;height:28px;border-radius:50%;color:var(--muted);font-size:20px;line-height:1;opacity:.6}
+.moves{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.mv{font-size:11.5px;padding:6px 10px;border-radius:20px;background:var(--bg);border:1px solid var(--line);color:var(--plum2)}
+.mv:active{background:var(--rose-soft)}
+.item.pin{background:linear-gradient(90deg,rgba(248,221,227,.55),rgba(248,221,227,0));border-radius:14px;padding-inline-start:10px;border-bottom:0;margin-bottom:6px}
+.who{margin-top:8px;padding:8px 12px;font-size:14px;border-radius:10px}
+.empty{text-align:center;color:var(--muted);padding:22px 10px;font-size:14px}
+.empty span{display:block;font-family:var(--serif);font-size:30px;color:var(--rose);margin-bottom:4px}
+.day-h{font-family:var(--serif);font-size:19px;color:var(--plum);margin-top:16px;padding-bottom:4px;display:flex;justify-content:space-between}
+.day-h small{font-family:var(--sans);font-size:12px;color:var(--muted)}
+select.field{appearance:none;-webkit-appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238C7B83' fill='none' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 14px center}
+select.field{padding-right:34px;text-overflow:ellipsis}
+
+/* FOCUS */
+.focus{background:linear-gradient(145deg,var(--plum) 0%,#5E3A4E 60%,#7A4E63 100%);color:#fff;text-align:center;padding:30px 22px;position:relative;overflow:hidden}
+.focus:before{content:"";position:absolute;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(232,165,180,.35),transparent 70%);top:-80px;right:-60px}
+.focus .eyebrow{color:var(--gold)}
+.focus h3{color:#fff;font-size:30px;margin:14px 0 6px;position:relative;overflow-wrap:anywhere}
+.focus .row{justify-content:center}
+.focus .btn.ghost{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff}
+.focus .btn.rose{box-shadow:0 8px 20px -8px rgba(232,165,180,.8)}
+
+/* MOODS */
+.moods{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.mood{padding:12px 2px;border-radius:14px;background:var(--bg);border:1px solid var(--line);font-size:11.5px;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .25s}
+.mood b{font-size:20px;font-weight:400}
+.mood.on{background:linear-gradient(135deg,var(--rose),var(--rose-deep));color:#fff;border-color:transparent}
+.wins .field{margin-bottom:8px}
+details{margin-top:4px}
+summary{cursor:pointer;color:var(--plum2);font-weight:500;list-style:none}
+summary::-webkit-details-marker{display:none}
+.hist{border-inline-start:2px solid var(--rose-soft);padding-block:6px;padding-inline:12px 0;margin-top:12px;font-size:13.5px}
+.hist b{color:var(--plum);font-weight:500}
+
+/* RESET */
+.ring-wrap{display:flex;align-items:center;gap:18px}
+.ring{width:84px;height:84px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;background:conic-gradient(var(--rose-deep) 0deg,var(--bg2) 0deg);transition:background .5s}
+.ring span{width:66px;height:66px;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:22px;font-weight:600;color:var(--plum)}
+.step{display:flex;align-items:center;gap:12px;width:100%;text-align:start;padding:12px 2px;border-bottom:1px solid var(--line);font-size:14.5px}
+.step:last-child{border-bottom:0}
+.step.on .chk{background:linear-gradient(135deg,var(--rose),var(--rose-deep));border-color:transparent}
+.step.on .chk svg{opacity:1}
+.step.on span{color:var(--muted)}
+.q-lbl{font-family:var(--serif);font-size:18px;color:var(--plum);margin:14px 0 8px;font-weight:600}
+.q-lbl:first-child{margin-top:0}
+textarea.sm{min-height:76px}
+
+/* NAV */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:50;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:rgba(255,253,251,.88);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-top:1px solid var(--line)}
+.nav-in{max-width:540px;margin:0 auto;display:flex;justify-content:space-around}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;font-size:10.5px;letter-spacing:.4px;color:var(--muted);position:relative;transition:color .2s}
+.nb svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.nb.active{color:var(--plum);font-weight:500}
+.nb.active:after{content:"";position:absolute;top:-8px;width:26px;height:3px;border-radius:3px;background:var(--rose-deep)}
+.badge{position:absolute;top:2px;left:55%;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--rose-deep);color:#fff;font-size:10px;line-height:17px;text-align:center;font-weight:600}
+.badge:empty{display:none}
+
+.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translate(-50%,20px);background:var(--plum);color:#fff;padding:9px 16px;border-radius:30px;font-size:13px;opacity:0;pointer-events:none;transition:all .3s;z-index:90;white-space:nowrap}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;padding:4px 0}
+@media (min-width:600px){.hero h1{font-size:44px}}
+
+/* PIED DE PAGE */
+.foot{text-align:center;padding:18px 16px 26px;margin-top:6px;border-top:1px solid var(--line)}
+.foot-logo{width:120px;height:120px;border-radius:26px;display:block;margin:4px auto 12px;box-shadow:0 12px 28px -12px rgba(87,10,99,.55)}
+.foot-brand{font-family:var(--serif);font-size:17px;font-weight:600;color:var(--plum);letter-spacing:.5px}
+.foot-txt{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.5}
+
+/* NAVIGATION & GUIDE */
+.back{display:inline-flex;align-items:center;gap:4px;color:var(--plum2);font-size:13.5px;font-weight:500;padding:4px 0;margin-bottom:6px}
+.back svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+html[dir="rtl"] .back svg,html[dir="rtl"] .lrow-ch svg{transform:scaleX(-1)}
+.lrow{display:flex;align-items:center;gap:12px;width:100%;text-align:start;padding:11px 2px;border-bottom:1px solid var(--line)}
+.lrow:last-child{border-bottom:0}
+.lrow-n{flex:1;font-family:var(--serif);font-size:19px;font-weight:600;color:var(--plum)}
+.lrow-c{font-size:12px;color:var(--muted)}
+.lrow-ch svg{width:16px;height:16px;fill:none;stroke:var(--muted);stroke-width:2;transform:scaleX(-1);display:block}
+html[dir="rtl"] .lrow-ch svg{transform:none}
+.home-prio h3{color:#fff;font-size:24px;margin:10px 0 4px;position:relative;overflow-wrap:anywhere}
+.home-prio .row{justify-content:center}
+.link-btn{display:block;margin:2px auto 20px;color:var(--plum2);font-size:13.5px;text-decoration:underline}
+.onb{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:radial-gradient(circle at 50% 25%,#FFFFFF 0%,#FBEFF1 45%,#F3D9DF 100%)}
+.onb-card{width:100%;max-width:420px;background:var(--card);border-radius:28px;padding:24px 22px 18px;box-shadow:0 20px 50px -20px rgba(74,44,61,.35);text-align:center}
+.onb-slide{display:none}
+.onb-slide.on{display:block;animation:fade .4s ease}
+.onb-lang{width:max-content;margin:0 auto 4px}
+.onb-ico{width:86px;height:86px;margin:14px auto 18px;border-radius:50%;background:var(--rose-soft);display:flex;align-items:center;justify-content:center;font-size:36px;color:var(--plum)}
+.onb h2{font-size:30px;margin-bottom:10px}
+.onb p{color:var(--muted);font-size:15px;line-height:1.6}
+.dots{display:flex;gap:6px;justify-content:center;margin:22px 0 16px}
+.dots span{width:8px;height:8px;border-radius:8px;background:var(--line);transition:all .3s}
+.dots span.on{width:22px;background:var(--rose-deep)}
+.onb-btns{display:flex;gap:10px}
+.onb-btns .btn{flex:1}
+
+/* LANGUES */
+.hero-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.lang{display:flex;flex:none;background:var(--card);border:1px solid var(--line);border-radius:30px;padding:3px;box-shadow:var(--shadow)}
+.lang button{min-width:38px;height:30px;padding:0 8px;border-radius:20px;font-size:12.5px;font-weight:600;color:var(--muted);transition:all .2s}
+.lang button.on{background:var(--plum);color:#fff}
+.lang button[data-l="ar"]{font-family:'Tajawal','Amiri',sans-serif;font-size:15px}
+html[dir="rtl"]{--serif:'Amiri','Noto Naskh Arabic',serif;--sans:'Tajawal','Noto Sans Arabic',system-ui,sans-serif}
+html[dir="rtl"] body *{letter-spacing:0!important}
+html[dir="rtl"] em{font-style:normal}
+html[dir="rtl"] .quote p{font-style:normal}
+html[dir="rtl"] .ar-dup{display:none}
+html[dir="rtl"] .t-cnt{right:auto;left:14px}
+html[dir="rtl"] select.field{background-position:left 14px center;padding-right:15px;padding-left:34px}
+html[dir="rtl"] .hero h1{line-height:1.35}
+html[dir="rtl"] .t-name,html[dir="rtl"] .c-head h2,html[dir="rtl"] .q-lbl{line-height:1.4}
+html[dir="rtl"] .badge{left:auto;right:55%}
+html[dir="rtl"] #splash .sp-en{letter-spacing:3px!important}
+
+/* FEUILLE DE PARTAGE */
+.sheet-bg{position:fixed;top:0;left:0;right:0;bottom:0;z-index:80;background:rgba(46,27,38,.45);display:none;align-items:flex-end;justify-content:center}
+.sheet-bg.show{display:flex}
+.sheet{background:var(--card);width:100%;max-width:540px;border-radius:26px 26px 0 0;padding:12px 18px calc(18px + env(safe-area-inset-bottom));animation:sheetUp .3s ease;max-height:92vh;overflow:auto}
+@keyframes sheetUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.grab{width:40px;height:4px;border-radius:4px;background:var(--line);margin:0 auto 12px}
+.sheet h3{font-size:24px;margin-bottom:10px}
+.sheet textarea{min-height:110px;max-height:180px;font-size:13.5px;margin-bottom:4px}
+.btn.wa{background:#25D366;color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;font-size:15.5px;box-shadow:0 8px 18px -8px rgba(37,211,102,.7)}
+.btn.wa svg{width:19px;height:19px;fill:none;stroke:#fff;stroke-width:1.9;stroke-linejoin:round}
+.sh-web{display:block;text-align:center;font-size:13px;color:var(--plum2);margin-top:12px}
+
+/* NOUVELLES SECTIONS */
+.sec-t{font-family:var(--serif);font-size:23px;color:var(--plum);margin:8px 4px 12px;font-weight:600}
+.due{flex:none;align-self:center;font-size:11.5px;padding:4px 9px;border-radius:20px;background:var(--bg);color:var(--muted);white-space:nowrap}
+.due.soon{background:var(--rose-soft);color:var(--rose-deep);font-weight:500}
+.due.late{background:#F6D9D3;color:#B4553F;font-weight:500}
+.due:empty{display:none}
+.alerts{border-inline-start:4px solid var(--rose)}
+.alert-row{display:flex;align-items:center;gap:10px;width:100%;text-align:start;padding:10px 2px;border-bottom:1px solid var(--line);font-size:14px}
+.alert-row:last-child{border-bottom:0}
+.al-t{flex:1;min-width:0;overflow-wrap:anywhere}
+.wa-btn{display:flex;align-items:center;justify-content:center;gap:8px}
+.wa-btn svg,.mv.wa svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+.mv.wa{display:inline-flex;align-items:center;gap:5px;background:var(--sage-soft);border-color:transparent;color:#4F6B51}
+.mv.wa svg{width:13px;height:13px}
+.btn.block{white-space:normal}
+.add .field{min-width:0}
+.bars{display:flex;align-items:flex-end;gap:4px;height:64px;margin-top:16px}
+.bars span{flex:1;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,var(--rose),var(--sage));min-height:4px}
+.q-num{display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:center;margin-bottom:6px}
+.q-num b{display:block;font-family:var(--serif);font-size:50px;color:var(--plum);line-height:1}
+.q-num small{font-size:12.5px;color:var(--muted)}
+.q-b{flex:none;width:48px;height:48px;border-radius:50%;background:var(--bg);border:1px solid var(--line);font-size:24px;color:var(--plum)}
+.file-lbl{display:flex;align-items:center;justify-content:center;gap:8px;border:1.5px dashed var(--rose);border-radius:14px;padding:16px;color:var(--plum2);font-size:14px;cursor:pointer;background:var(--bg);text-align:center}
+.file-lbl input{display:none}
+textarea.code{font-family:ui-monospace,Menlo,monospace;font-size:12px;min-height:90px;margin-top:10px}
+.focus h3 + p, .focus p{position:relative}
+
+/* SÉRÉNITÉ */
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;padding:9px 15px;border-radius:30px;background:var(--card);border:1px solid var(--line);font-size:13px;color:var(--plum2)}
+.tab.on{background:var(--plum);color:#fff;border-color:transparent}
+.act{display:flex;align-items:center;gap:12px;width:100%;text-align:start;padding:13px 2px;border-bottom:1px solid var(--line)}
+.act:last-child{border-bottom:0}
+.act-ico{flex:none;width:42px;height:42px;border-radius:14px;background:var(--rose-soft);display:flex;align-items:center;justify-content:center;font-size:19px;transition:all .25s}
+.act.sp .act-ico{background:var(--sage-soft)}
+.act-t{font-weight:500;color:var(--ink);font-size:14.5px}
+.act-d{font-size:12.5px;color:var(--muted);margin-top:2px}
+.ar{font-family:'Amiri','Scheherazade New','Noto Naskh Arabic',serif;direction:rtl;unicode-bidi:isolate;color:var(--plum2)}
+.act .chk{margin-inline-start:auto}
+.act.on .act-ico{background:linear-gradient(135deg,var(--rose),var(--rose-deep));color:#fff}
+.act.on .chk{background:linear-gradient(135deg,var(--rose),var(--rose-deep));border-color:transparent}
+.act.on .chk svg{opacity:1}
+.act.on .act-t{color:var(--muted)}
+.dhikr-sel{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:6px 0 18px}
+.dk{padding:8px 12px;border-radius:30px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font-size:15px}
+.dk.on{background:#fff;color:var(--plum)}
+.tap{width:170px;height:170px;border-radius:50%;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;
+  background:radial-gradient(circle at 35% 30%,#F3BFCB,#C9748A 70%);box-shadow:0 0 0 8px rgba(255,255,255,.08),0 18px 40px -12px rgba(0,0,0,.45);transition:transform .1s;position:relative;user-select:none;-webkit-user-select:none}
+.tap:active{transform:scale(.95)}
+.tap b{font-family:var(--serif);font-size:54px;font-weight:600;line-height:1}
+.tap small{font-size:12px;letter-spacing:1px;opacity:.9;margin-top:4px}
+.dk-name{font-size:26px;color:#fff;margin:16px 0 4px;position:relative}
+.focus .mini{background:none;color:rgba(255,255,255,.7);font-size:12.5px;text-decoration:underline;margin-top:12px;position:relative}
+.suggest-box{text-align:center}
+.suggest-box h3{font-size:24px;margin:8px 0 4px}
+</style>
+</head>
+<body>
+<!-- ===== Aya Créations DZ : activation lock (start) ===== -->
+<style>
+#aya-lock{position:fixed;top:0;left:0;right:0;bottom:0;z-index:100000;display:none;align-items:center;justify-content:center;
+  padding:20px;background:linear-gradient(160deg,#2b1022 0%,#4A2133 45%,#7a2f4f 100%);font-family:'Cairo','Segoe UI',Tahoma,Arial,sans-serif;color:#3B2530;overflow-y:auto}
+#aya-lock.on{display:flex}
+#aya-lock *{box-sizing:border-box}
+#aya-lock .al-card{width:100%;max-width:380px;background:#FFF6F1;border-radius:24px;padding:24px 20px 20px;text-align:center;
+  box-shadow:0 20px 50px rgba(0,0,0,.35);direction:rtl}
+#aya-lock .al-logo{width:76px;height:76px;border-radius:18px;margin:0 auto 10px;display:block}
+#aya-lock h2{font-family:inherit;font-size:20px;margin:0 0 2px;color:#4A2133;font-weight:800}
+#aya-lock .al-fr{direction:ltr;font-size:12.5px;color:#8a6f7a;margin:0}
+#aya-lock .al-step{display:flex;gap:10px;align-items:flex-start;text-align:right;margin:16px 0 0}
+#aya-lock .al-n{flex:0 0 26px;height:26px;border-radius:50%;background:#B8486A;color:#fff;font-weight:800;font-size:14px;
+  display:flex;align-items:center;justify-content:center;margin-top:2px}
+#aya-lock .al-t{flex:1;font-size:15px;line-height:1.5;font-weight:600}
+#aya-lock .al-t small{display:block;direction:ltr;text-align:left;font-size:12px;color:#8a6f7a;font-weight:400}
+#aya-lock .al-id{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;background:#fff;
+  border:2px dashed #D8708C;border-radius:14px;padding:8px 8px 8px 12px;direction:ltr}
+#aya-lock .al-id b{font-size:28px;letter-spacing:4px;color:#4A2133;font-variant-numeric:tabular-nums}
+#aya-lock button{font-family:inherit;cursor:pointer;border:0}
+#aya-lock .al-copy{background:#4A2133;color:#fff;border-radius:10px;padding:9px 12px;font-weight:700;font-size:13px}
+#aya-lock input{width:100%;margin-top:8px;padding:12px;border-radius:14px;border:2px solid #ead3dc;background:#fff;
+  font-size:24px;letter-spacing:6px;text-align:center;direction:ltr;font-weight:800;color:#4A2133;font-family:inherit}
+#aya-lock input:focus{outline:none;border-color:#B8486A}
+#aya-lock .al-go{width:100%;margin-top:12px;background:linear-gradient(135deg,#8E3350,#B8486A);color:#fff;border-radius:14px;
+  padding:13px;font-size:17px;font-weight:800}
+#aya-lock .al-msg{min-height:22px;margin-top:8px;font-size:13.5px;font-weight:700}
+#aya-lock .al-msg.err{color:#c0392b}
+#aya-lock .al-msg.ok{color:#5E8F6E}
+#aya-lock .al-foot{margin-top:12px;font-size:11.5px;color:#8a6f7a;line-height:1.5}
+#aya-lock.shake .al-card{animation:alshake .4s}
+@keyframes alshake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+#aya-lock.out{animation:alout .45s ease forwards}
+@keyframes alout{to{opacity:0;visibility:hidden}}
+</style>
+<div id="aya-lock" class="notr" role="dialog" aria-modal="true" aria-labelledby="al-title">
+  <div class="al-card">
+    <img class="al-logo" src="data:image/jpeg;base64,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saT/AKCOj/8Agwjo56YFKS7u5UKSXVw6HqrSsR+RNI9xcPEIXuJmiwPkaRivHTjOOKvf2NJ/0EdH/wDBhHUdxpckMLym+0uQIM7Y71GY/QDqaFOHQCrJc3MkflyXM7pwNrSsRx04JxRFdXUSBIrmeNASdqyso568A13Hwn8EaZ40h1aK51WW0vbdFNtGgU5znLsDyVBABAx169Kb8WfBWmeDDpVvaapLd3dxEzXMcgUbcYw4A6KSSAD6VzrGUHW+r/a9BX1scNFLLE++GR42xjcjFTj6illlllbdLLJIwGAXYsQPTJq5b6ZJNCkovtMjDDO2W9RGH1B5FP8A7Gk/6COj/wDgwjrp9pC4yot7eraGzW8uVtT1hEzCM/8AAc4/Soo5JInDxSPGw6MrEEfiK0f7Gk/6COj/APgwjo/saT/oI6P/AODCOkpwQGfLJJK++WR5HwBudix49zTdzb9+47853ZOc+ua0v7Gk/wCgjo//AIMI6P7Gk/6COj/+DCOj2kNgKl3e3t5s+13lzcbPu+dMz7fpknFV60/7Gk/6COj/APgwjo/saT/oJaP/AODCOmqkFsBTa8vGUq15ckHqDM3P61AOMY4x0x2rT/saT/oI6P8A+DCOj+xpP+gjo/8A4MI6SnBbAVPt19kkX13k8k+e/P61AzM7FnYsxOSSck06eMxTPGXjcqSN0bBlPuCOo96ZVpLdAFFFFUAUUUUAFFFFABk+tGeMk0VJaymC6inADeW4bB6HB6UgI8n1oz7/AK1d1S4s5RHHZQtFEudwYDJPQH/vkAn3Jp2rXdtcpILeLyy1y8g4x8pUAfToeKhSemgFDPv+tGff9a07i9tn1mC6G4wIykr5YBAHbHf/AOvTVvLYau92FKxMjBVKD5WKYGcdcHv360cz7AZ2T60Z96dId0jNndlickYz+FWby68+K1QsT5afP8oHzbjyPXjA/CquBUz70ZyODkfWr+q3Vvcq4gi8vNzLJ06q23b9Oh4pmr3EV1fPLCSIz91Sm3aPSlFt7oCPTb6702+ivrC6ltbmFt0csTYZT/ntSaheXWoXst7fXElxczMWklkbLMfrVvSbyyt41W6g81hOJAQgOAABg56jBJx6ge9Q2EtrFBcJOrM0sZjUhc7OMhvruC/hmpdubm5dQKecd6M+9XrW4t0svKbzI3Bk3bFB8zK4UEnpg/ofWoGlQ2EUO0l1mZ244IIUAZ/A/nV3YEGfejPvVvU7hJ52aFj5JYskZQL5YP8ADx1xjH4U/S7q3t4LtJ0LGZAq4UHHDevTqKLu17AUc84zz9aM84zVsXEY0gW2SJfNLt8udwwuBn8DT57m2exESeYrBI18sKAu4Z3MT3z19efQCld9gKOeOtGT61eS6iS8s5goIgiVWDRggsAeoPBGcdaGubb7dbTQR+XHGq5SRd4DZJI9SvPHfHuKOZ9gKOfejJ9TUt48cl1LJFv2M5Khzlse9RVa2AKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//Z" alt="Aya Créations DZ">
+    <h2 id="al-title">تفعيل Esprit Léger</h2>
+    <p class="al-fr">Activation de votre application</p>
+
+    <div class="al-step">
+      <span class="al-n">1</span>
+      <div class="al-t">ابعثي هاد الرقم لـ Aya Créations DZ
+        <small>Envoyez ce numéro à Aya Créations DZ</small>
+        <div class="al-id"><b id="al-id">------</b><button type="button" class="al-copy" id="al-copy">نسخ · Copier</button></div>
+      </div>
+    </div>
+
+    <div class="al-step">
+      <span class="al-n">2</span>
+      <div class="al-t">اكتبي كود التفعيل اللي يوصلك
+        <small>Saisissez le code d'activation reçu</small>
+        <form id="al-form" autocomplete="off">
+          <input id="al-code" type="text" inputmode="numeric" maxlength="12" placeholder="______" aria-label="Code d'activation">
+          <button type="submit" class="al-go">فعّلي · Activer</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="al-msg" id="al-msg" aria-live="polite"></div>
+    <div class="al-foot">Instagram: <b dir="ltr">@aya.creations.dz</b><br>© Aya Créations DZ · للاستعمال الشخصي برك، ممنوع المشاركة وإعادة البيع</div>
+  </div>
+</div>
+<script>
+(function(){
+  "use strict";
+  var PRODUCT = "LEGER";
+  var SECRET  = "LK0AwGJdgaiD23TxGkmoidbSmGRJWIxJ";
+  var KEY = "aya_lic_" + PRODUCT;
+
+  /* cyrb53 hash */
+  function h53(str){var h1=0xdeadbeef,h2=0x41c6ce57;for(var i=0,ch;i<str.length;i++){ch=str.charCodeAt(i);
+    h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677);}
+    h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);
+    h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);
+    return 4294967296*(2097151&h2)+(h1>>>0);}
+  function codeFor(id){var n=h53(SECRET+"|"+PRODUCT+"|"+id)%1000000;return ("00000"+n).slice(-6);}
+
+  function load(){try{var v=localStorage.getItem(KEY);return v?JSON.parse(v):null;}catch(e){return null;}}
+  function store(o){try{localStorage.setItem(KEY,JSON.stringify(o));}catch(e){}}
+  function newId(){var n;try{var a=new Uint32Array(1);crypto.getRandomValues(a);n=a[0];}catch(e){n=Math.floor(Math.random()*4294967296);}
+    return String(100000+(n%900000));}
+
+  var st=load()||{};
+  if(!st.id){st.id=newId();store(st);}
+  if(st.ok && st.ok===codeFor(st.id)) return;           /* already activated */
+
+  var box=document.getElementById("aya-lock");
+  var $=function(id){return document.getElementById(id);};
+  box.classList.add("on");
+  $("al-id").textContent=st.id;
+
+  function msg(t,cls){var m=$("al-msg");m.textContent=t;m.className="al-msg "+(cls||"");}
+  function digits(s){ /* Arabic-Indic and Persian digits -> 0-9, keep digits only */
+    return String(s).replace(/[٠-٩]/g,function(c){return c.charCodeAt(0)-0x660;})
+                    .replace(/[۰-۹]/g,function(c){return c.charCodeAt(0)-0x6F0;})
+                    .replace(/\D/g,"");}
+
+  $("al-copy").addEventListener("click",function(){
+    var t=st.id,ok=false;
+    function done(){msg("تنسخ الرقم ✓ ابعثيه في الميساج","ok");}
+    if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(t).then(done,fb);}else fb();
+    function fb(){try{var ta=document.createElement("textarea");ta.value=t;ta.style.position="fixed";ta.style.opacity="0";
+      document.body.appendChild(ta);ta.select();ok=document.execCommand("copy");document.body.removeChild(ta);}catch(e){}
+      ok?done():msg("انسخي الرقم بيدك: "+t,"");}
+  });
+
+  $("al-form").addEventListener("submit",function(e){
+    e.preventDefault();
+    var v=digits($("al-code").value);
+    if(v.length!==6){msg("الكود فيه 6 أرقام · Le code contient 6 chiffres","err");return;}
+    if(v===codeFor(st.id)){
+      st.ok=v;store(st);
+      msg("تفعّل التطبيق ✓ بالصحة · Activé","ok");
+      setTimeout(function(){box.classList.add("out");setTimeout(function(){box.parentNode&&box.parentNode.removeChild(box);},500);},700);
+    }else{
+      msg("الكود غالط، تأكدي منو · Code incorrect","err");
+      box.classList.remove("shake");void box.offsetWidth;box.classList.add("shake");
+    }
+  });
+})();
+</script>
+<!-- ===== Aya Créations DZ : activation lock (end) ===== -->
+<!-- ===== Aya Créations DZ : load guard (start) ===== -->
+<script>
+(function(){
+  /* If the page did not finish loading (weak connection), show a clear message
+     instead of a half-empty screen. window.__ayaLoaded is set by the very last script. */
+  setTimeout(function(){
+    if(window.__ayaLoaded)return;
+    try{
+      var d=document.createElement('div');
+      d.className='notr';d.id='aya-guard';
+      d.setAttribute('style','position:fixed;top:0;left:0;right:0;bottom:0;z-index:100001;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(43,16,34,.92);font-family:Cairo,Segoe UI,Tahoma,Arial,sans-serif');
+      d.innerHTML='<div style="max-width:340px;background:#FFF6F1;border-radius:22px;padding:22px 18px;text-align:center;color:#3B2530;direction:rtl">'
+        +'<div style="font-size:40px">📶</div>'
+        +'<div style="font-size:18px;font-weight:800;margin:6px 0 4px">التطبيق ما تحملش كامل</div>'
+        +'<div style="font-size:14px;line-height:1.6">تأكدي من الإنترنت وعاودي.<br><span dir="ltr" style="font-size:12px;color:#8a6f7a">Chargement incomplet : vérifiez votre connexion.</span></div>'
+        +'<button type="button" style="margin-top:14px;width:100%;border:0;border-radius:14px;padding:13px;font-size:16px;font-weight:800;color:#fff;background:linear-gradient(135deg,#8E3350,#B8486A);font-family:inherit">عاودي · Réessayer</button>'
+        +'</div>';
+      d.querySelector('button').onclick=function(){location.reload();};
+      (document.body||document.documentElement).appendChild(d);
+    }catch(e){}
+  },9000);
+})();
+</script>
+<!-- ===== Aya Créations DZ : load guard (end) ===== -->
+
+
+
+<!-- ÉCRAN D'ACCUEIL -->
+<div id="splash" onclick="this.className='hide'">
+  <div class="sp-in">
+    <div class="sp-logo">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M32 50c-10-5-15-14-12-25 7 1 12 6 12 13 0-7 5-12 12-13 3 11-2 20-12 25z" fill="#E8A5B4"/>
+        <path d="M32 50c-4-6-5-13-3-22" stroke="#6B4257" stroke-width="1.4" fill="none" opacity=".8"/>
+        <path d="M32 22c-3-5-2-10 0-13 2 3 3 8 0 13z" fill="#C8A27C"/>
+        <circle cx="47" cy="14" r="1.8" fill="#C8A27C"/><circle cx="17" cy="18" r="1.3" fill="#F8DDE3"/><circle cx="50" cy="30" r="1" fill="#F8DDE3"/>
+      </svg>
+    </div>
+    <p class="sp-ar">راحة البال</p>
+    <h1>Esprit Léger</h1>
+    <p class="sp-en">Mental Load Planner</p>
+    <div class="sp-bar"><span></span></div>
+  </div>
+</div>
+<script>setTimeout(function(){var s=document.getElementById('splash');if(s)s.className='hide';},2300);</script>
+
+<main class="app">
+
+  <!-- ACCUEIL -->
+  <section class="view active" id="v-home">
+    <header class="hero">
+      <div class="hero-top"><p class="eyebrow" id="today">Aujourd'hui</p><div class="lang" id="langSw" role="group" aria-label="Langue / Language / اللغة"><button data-act="lang" data-l="fr">FR</button><button data-act="lang" data-l="en">EN</button><button data-act="lang" data-l="ar">ع</button></div></div>
+      <h1>Bonjour<em id="hiName"></em></h1>
+      <p class="sub">Dépose ta charge mentale ici. Ta tête n'est pas faite pour tout retenir.</p>
+    </header>
+
+    <div class="card alerts" id="alerts" style="display:none"></div>
+
+    <div class="card focus home-prio">
+      <p class="eyebrow">Ma priorité du moment</p>
+      <div id="homePrio"></div>
+    </div>
+
+    <div class="card">
+      <div class="m-top"><span>Charge mentale</span><b id="mLevel">Légère</b></div>
+      <div class="m-bar"><span id="mFill"></span></div>
+      <p class="m-note" id="mNote"></p>
+    </div>
+
+    <div class="card quote"><p id="quote"></p></div>
+
+    <div class="card">
+      <label class="lbl" for="nameIn">Ton prénom</label>
+      <input class="field" id="nameIn" data-name placeholder="Ex. Sarah" autocomplete="off">
+    </div>
+    <button class="link-btn" data-act="onbShow">Revoir le guide</button>
+  </section>
+
+  <!-- BRAIN DUMP -->
+  <section class="view" id="v-dump">
+    <header class="hero">
+      <p class="eyebrow">Étape 1 · Écrire</p>
+      <h1 data-th>Vider ma <em>tête</em></h1>
+      <p class="sub">Écris tout ce qui tourne dans ta tête, une pensée par ligne. Sans trier, sans juger.</p>
+    </header>
+    <div class="card">
+      <textarea class="field" id="dumpIn" data-draft placeholder="Prendre RDV pédiatre&#10;Acheter cadeau anniversaire&#10;Répondre à la maîtresse&#10;…"></textarea>
+      <button class="btn primary block" data-act="dump">Libérer ma tête</button>
+    </div>
+    <div class="card">
+      <div class="c-head"><h2>À trier</h2><span class="pill" id="p-dump">0</span></div>
+      <p class="hint" style="margin-top:0">Envoie chaque pensée au bon endroit.</p>
+      <ul class="list" id="l-dump"></ul>
+    </div>
+    <div class="card">
+      <div class="c-head"><h2>Mes listes</h2></div>
+      <button class="lrow" data-act="go" data-go="deleg"><span class="t-ico">⇄</span><span class="lrow-n">Je peux déléguer</span><span class="lrow-c" id="c-deleg"></span><span class="lrow-ch"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></span></button>
+      <button class="lrow" data-act="go" data-go="week"><span class="t-ico">◷</span><span class="lrow-n">Cette semaine</span><span class="lrow-c" id="c-week"></span><span class="lrow-ch"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></span></button>
+    </div>
+  </section>
+
+  <!-- MAINTENANT -->
+  <section class="view" id="v-now">
+    <header class="hero">
+      <p class="eyebrow">Une chose à la fois</p>
+      <h1 data-th>Que dois-je faire <em>maintenant</em> ?</h1>
+      <p class="sub">Pas toute la liste. Juste la prochaine étape.</p>
+    </header>
+    <div class="card focus" id="focus"></div>
+    <div class="card">
+      <div class="c-head"><h2>Mes priorités</h2><span class="pill" id="p-now">0</span></div>
+      <div class="add"><input class="field" id="in-now" data-enter="now" placeholder="Ajouter une priorité…"><button class="btn primary" data-act="add" data-cat="now">+</button></div>
+      <p class="hint">Conseil : garde 3 priorités maximum.</p>
+      <ul class="list" id="l-now"></ul>
+      <button class="btn ghost block wa-btn" data-act="shareList" data-cat="now"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 012-2h9"/></svg>Copier la liste</button>
+    </div>
+  </section>
+
+  <!-- DÉLÉGUER -->
+  <section class="view" id="v-deleg">
+    <header class="hero">
+      <button class="back" data-act="go" data-go="dump"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Vider ma tête</button>
+      <p class="eyebrow">Tu n'es pas seule</p>
+      <h1 data-th>Je peux <em>déléguer</em></h1>
+      <p class="sub">Ce que quelqu'un d'autre peut porter à ta place.</p>
+    </header>
+    <div class="card">
+      <input class="field" id="in-deleg" data-enter="deleg" placeholder="La tâche…">
+      <div class="add" style="margin-top:8px"><input class="field" id="in-who" data-enter="deleg" placeholder="À qui ? (partenaire, enfant…)"><button class="btn primary" data-act="add" data-cat="deleg">+</button></div>
+      <ul class="list" id="l-deleg"></ul>
+      <button class="btn ghost block wa-btn" data-act="shareList" data-cat="deleg"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 012-2h9"/></svg>Copier la liste</button>
+    </div>
+  </section>
+
+  <!-- SEMAINE -->
+  <section class="view" id="v-week">
+    <header class="hero">
+      <button class="back" data-act="go" data-go="dump"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Vider ma tête</button>
+      <p class="eyebrow">Vue d'ensemble</p>
+      <h1 data-th>Cette <em>semaine</em></h1>
+      <p class="sub">Répartis la charge sur les jours pour respirer.</p>
+    </header>
+    <div class="card">
+      <input class="field" id="in-week" data-enter="week" placeholder="Ajouter une tâche…">
+      <div class="add" style="margin-top:8px">
+        <select class="field" id="in-day"></select>
+        <button class="btn primary" data-act="add" data-cat="week">Ajouter</button>
+      </div>
+      <div id="l-week"></div>
+      <button class="btn ghost block wa-btn" data-act="shareList" data-cat="week"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 012-2h9"/></svg>Copier ma semaine</button>
+    </div>
+  </section>
+
+  <!-- MA VIE -->
+  <section class="view" id="v-vie">
+    <header class="hero">
+      <p class="eyebrow">Ce que tu portes</p>
+      <h1 data-th>Ma <em>vie</em></h1>
+      <p class="sub">Famille, cycle, rappels et dates importantes : tout ce que tu portes, au même endroit.</p>
+    </header>
+    <div class="tiles">
+      <button class="tile" data-act="go" data-go="famille"><div class="t-ico">👧</div><div class="t-name">Famille &amp; enfants</div><span class="t-cnt" id="c-famille"></span></button>
+      <button class="tile" data-act="go" data-go="cycle"><div class="t-ico">🌸</div><div class="t-name">Cycle &amp; énergie</div><span class="t-cnt" id="c-cycle"></span></button>
+      <button class="tile" data-act="go" data-go="dates"><div class="t-ico">❦</div><div class="t-name">À ne pas oublier</div><span class="t-cnt" id="c-dates"></span></button>
+      <button class="tile" data-act="go" data-go="data"><div class="t-ico">💾</div><div class="t-name">Sauvegarde</div><span class="t-cnt" id="c-data"></span></button>
+    </div>
+  </section>
+
+  <!-- FAMILLE -->
+  <section class="view" id="v-famille">
+    <header class="hero">
+      <button class="back" data-act="go" data-go="vie"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Ma vie</button>
+      <p class="eyebrow">Tout au même endroit</p>
+      <h1 data-th>Famille &amp; <em>enfants</em></h1>
+      <p class="sub">Tout ce que tu es souvent la seule à savoir, enfin écrit quelque part.</p>
+    </header>
+    <div class="tabs" id="kidTabs"></div>
+    <div id="kidBody"></div>
+  </section>
+
+  <!-- CYCLE -->
+  <section class="view" id="v-cycle">
+    <header class="hero">
+      <button class="back" data-act="go" data-go="vie"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Ma vie</button>
+      <p class="eyebrow">À l'écoute de toi</p>
+      <h1 data-th>Cycle &amp; <em>énergie</em></h1>
+      <p class="sub">Comprendre ton rythme pour ajuster ta charge, sans culpabiliser.</p>
+    </header>
+    <div class="card focus" id="cyStatus"></div>
+    <div class="card">
+      <h2 class="q-lbl">Mes règles</h2>
+      <button class="btn rose block" data-act="cyStart" style="margin-top:0">Elles ont commencé aujourd'hui</button>
+      <button class="btn ghost block" data-act="cyEnd" style="margin-top:8px">Elles sont terminées aujourd'hui</button>
+      <p class="hint">Ou indiquer le début à une autre date :</p>
+      <div class="add" style="margin-top:8px"><input class="field" type="date" id="cyDate"><button class="btn primary" data-act="cyStartDate">Ajouter</button></div>
+      <ul class="list" id="cyHist"></ul>
+    </div>
+    <div class="card">
+      <h2 class="q-lbl">Mon énergie aujourd'hui</h2>
+      <div class="moods" id="energy"></div>
+      <div class="bars" id="enBars"></div>
+      <p class="hint">Mes 14 derniers jours</p>
+    </div>
+    <div class="card">
+      <div class="c-head"><h2>Jours de jeûne à rattraper</h2></div>
+      <p class="ar ar-dup" style="margin:-6px 0 14px;font-size:18px">قضاء الصيام</p>
+      <div id="qada"></div>
+      <p class="hint">Note ici les jours de Ramadan manqués et coche chaque jour rattrapé.</p>
+    </div>
+  </section>
+
+  <!-- DATES -->
+  <section class="view" id="v-dates">
+    <header class="hero">
+      <button class="back" data-act="go" data-go="vie"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Ma vie</button>
+      <p class="eyebrow">Mémoire externe</p>
+      <h1 data-th>À ne pas <em>oublier</em></h1>
+      <p class="sub">Les petites choses à retenir et les dates importantes : je te préviens à l'avance sur l'accueil.</p>
+    </header>
+    <div class="card">
+      <div class="c-head"><h2>Petits rappels</h2></div>
+      <p class="hint" style="margin:-4px 0 12px">Sans date, juste à ne pas oublier.</p>
+      <div class="add"><input class="field" id="in-remind" data-enter="remind" placeholder="Ex. Signer le carnet de liaison"><button class="btn rose" data-act="add" data-cat="remind">+</button></div>
+      <ul class="list" id="l-remind"></ul>
+      <button class="btn ghost block wa-btn" data-act="shareList" data-cat="remind"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 012-2h9"/></svg>Copier la liste</button>
+    </div>
+    <div class="card">
+      <div class="c-head"><h2>Dates &amp; papiers</h2></div>
+      <input class="field" id="in-dt" data-enter="dt" placeholder="Ex. Passeport de Yasmine, Anniversaire maman…">
+      <div class="add" style="margin-top:8px">
+        <select class="field" id="dtType">
+          <option value="anniv">🎂 Anniversaire</option>
+          <option value="papier">🪪 Papier à renouveler</option>
+          <option value="facture">🧾 Facture mensuelle</option>
+          <option value="rdv">📅 Rendez-vous</option>
+          <option value="autre">📌 Autre</option>
+        </select>
+        <input class="field" type="date" id="dtDate">
+      </div>
+      <button class="btn primary block" data-act="dtAdd">Ajouter</button>
+      <p class="hint">Anniversaire : mets l'année de naissance pour voir l'âge. Papiers : alerte 2 mois avant l'expiration. Factures : chaque mois au même jour.</p>
+    </div>
+    <div class="card">
+      <div class="c-head"><h2>Prochaines dates</h2></div>
+      <ul class="list" id="dtList" style="margin-top:0"></ul>
+    </div>
+  </section>
+
+  <!-- SAUVEGARDE -->
+  <section class="view" id="v-data">
+    <header class="hero">
+      <button class="back" data-act="go" data-go="vie"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Ma vie</button>
+      <p class="eyebrow">Tes données t'appartiennent</p>
+      <h1 data-th>Sauvegarde &amp; <em>restauration</em></h1>
+      <p class="sub">Garde une copie de tout ton planner pour changer de téléphone sans rien perdre.</p>
+    </header>
+    <div class="card focus" id="dataStatus"></div>
+    <div class="card">
+      <h2 class="q-lbl">Sauvegarder</h2>
+      <button class="btn primary block" data-act="exportFile" style="margin-top:0">Télécharger ma sauvegarde (.json)</button>
+      <button class="btn ghost block" data-act="exportCopy" style="margin-top:8px">Copier le code de sauvegarde</button>
+      <textarea class="field code" id="exportBox" readonly style="display:none"></textarea>
+      <p class="hint">Astuce : fais une sauvegarde une fois par mois et garde-la précieusement.</p>
+    </div>
+    <div class="card">
+      <h2 class="q-lbl">Restaurer</h2>
+      <label class="file-lbl">📂 Choisir un fichier de sauvegarde<input type="file" id="importFile" accept=".json,application/json,text/plain"></label>
+      <textarea class="field code" id="importText" placeholder="…ou colle ici ton code de sauvegarde"></textarea>
+      <button class="btn rose block" data-act="importDo">Restaurer mes données</button>
+      <p class="hint">Attention : la restauration remplace les données actuelles de ce téléphone.</p>
+    </div>
+  </section>
+
+
+  <!-- DÉCOMPRESSER -->
+  <section class="view" id="v-calme">
+    <header class="hero">
+      <p class="eyebrow">Sérénité · <span class="ar">سكينة</span></p>
+      <h1 data-th>Décompresser &amp; <em>apaiser l'âme</em></h1>
+      <p class="sub">Des gestes simples pour vider l'esprit et retrouver la paix intérieure.</p>
+    </header>
+
+    <div class="card">
+      <div class="c-head"><h2>Rituels du jour</h2><span class="pill" id="habCount">0/8</span></div>
+      <div class="chips" id="habits"></div>
+      <div style="margin-top:12px;border-top:1px solid var(--line)">
+        <button class="lrow" data-act="go" data-go="soir"><span class="t-ico">☾</span><span class="lrow-n">Mon soir</span><span class="lrow-c" id="c-soir"></span><span class="lrow-ch"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></span></button>
+        <button class="lrow" data-act="go" data-go="reset"><span class="t-ico">↻</span><span class="lrow-n">Bilan de la semaine</span><span class="lrow-c" id="c-reset"></span><span class="lrow-ch"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></span></button>
+      </div>
+    </div>
+
+    <div class="card focus">
+      <p class="eyebrow">Mon dhikr du jour</p>
+      <h3 class="dk-name ar" id="dkName"></h3>
+      <div class="dhikr-sel" id="dkSel"></div>
+      <button class="tap" data-act="tasbih" aria-label="Compter"><b id="dkCount">0</b><small id="dkGoal">/ 100</small></button>
+      <button class="mini" data-act="tasbihReset">Remettre à zéro</button>
+    </div>
+
+    <div class="card suggest-box">
+      <p class="eyebrow">Besoin d'une idée ?</p>
+      <h3 id="sugAct">Laisse-toi guider</h3>
+      <p class="hint" style="margin-top:0" id="sugDesc">Une activité douce, choisie pour toi.</p>
+      <button class="btn rose block" data-act="randAct">Me proposer une activité</button>
+    </div>
+
+    <div class="tabs" id="actTabs"></div>
+    <div class="card">
+      <div class="c-head"><h2 id="actTitle">Activités</h2><span class="pill" id="actCount">0</span></div>
+      <div id="actList"></div>
+    </div>
+  </section>
+
+  <!-- SOIR -->
+  <section class="view" id="v-soir">
+    <header class="hero">
+      <button class="back" data-act="go" data-go="calme"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Sérénité</button>
+      <p class="eyebrow" id="soirDate">Ce soir</p>
+      <h1 data-th>Mon <em>soir</em></h1>
+      <p class="sub">Pose ta journée avant de dormir. Demain s'en occupera.</p>
+    </header>
+    <div class="card">
+      <h2 class="q-lbl">Comment je me sens</h2>
+      <div class="moods" id="moods"></div>
+    </div>
+    <div class="card wins">
+      <h2 class="q-lbl">3 petites victoires</h2>
+      <input class="field" data-ev="w0" placeholder="1.">
+      <input class="field" data-ev="w1" placeholder="2.">
+      <input class="field" data-ev="w2" placeholder="3.">
+      <h2 class="q-lbl">Demain, je commence par…</h2>
+      <input class="field" data-ev="tomorrow" placeholder="Une seule chose">
+      <button class="btn ghost block" data-act="go" data-go="dump">Encore des pensées ? Vide-les ici</button>
+    </div>
+    <div class="card">
+      <details><summary>Mes soirées précédentes ›</summary><div id="hist"></div></details>
+    </div>
+  </section>
+
+  <!-- RESET -->
+  <section class="view" id="v-reset">
+    <header class="hero">
+      <button class="back" data-act="go" data-go="calme"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Sérénité</button>
+      <p class="eyebrow" id="wkLabel">Cette semaine</p>
+      <h1 data-th>Bilan de la <em>semaine</em></h1>
+      <p class="sub">Un rituel hebdomadaire pour repartir légère.</p>
+    </header>
+    <div class="card">
+      <div class="ring-wrap">
+        <div class="ring" id="ring"><span id="ringTxt">0%</span></div>
+        <div><h2 style="font-size:22px">Mon rituel</h2><p class="hint" style="margin-top:4px" id="ringNote">Prends 20 minutes rien que pour toi.</p></div>
+      </div>
+      <div style="margin-top:14px" id="steps"></div>
+    </div>
+    <div class="card">
+      <h2 class="q-lbl">Ce qui m'a pesé cette semaine</h2>
+      <textarea class="field sm" data-rs="lourd"></textarea>
+      <h2 class="q-lbl">Ce que je choisis de lâcher</h2>
+      <textarea class="field sm" data-rs="lache"></textarea>
+      <h2 class="q-lbl">Mon intention pour la semaine</h2>
+      <textarea class="field sm" data-rs="intention"></textarea>
+    </div>
+    <div class="card">
+      <h2 class="q-lbl">Alléger mes listes</h2>
+      <p class="hint" style="margin-top:0">Efface les tâches déjà cochées, dans toutes les listes, pour repartir sur des listes propres.</p>
+      <button class="btn ghost block" id="cleanBtn" data-act="clean">Effacer les tâches terminées</button>
+    </div>
+  </section>
+  <footer class="foot">
+    <img class="foot-logo" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwQDAwQEBAQFBQQFBwsHBwYGBw4KCggLEA4RERAOEA8SFBoWEhMYEw8QFh8XGBsbHR0dERYgIh8cIhocHRz/2wBDAQUFBQcGBw0HBw0cEhASHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBz/wAARCAFoAWgDASIAAhEBAxEB/8QAHQABAAEFAQEBAAAAAAAAAAAAAAYDBAUHCAIBCf/EAEgQAAEDAwIDBAYIAwYEBQUAAAEAAgMEBREGEgchMRNBUWEIFBUicYEyQlaCkZSh0yNSYhYzU3KSsSQlwdEXGGOisjRDg8Lw/8QAGgEBAAMBAQEAAAAAAAAAAAAAAAECAwQFBv/EADQRAAIBAgQDBgYBBAMBAAAAAAABAgMRBBIhMRNBcQVRYYGh0SIyUpGxwfAUI0LhM3KS8f/aAAwDAQACEQMRAD8A5VREX2p9qEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBEVSAxNniM7HPhDwXtY7a5zc8wD3HHegKaK9u8tBNdKyS1089NbnyuNPDPIJJI2dwc4AZPnhUKelnq3FsET5C3mdo5NHmeg+ahPS70BRRXLqVsZIkqIWkfVaS8/py/VUX7eQac479uMpe4PCLI2m5U9u9d9Yt0Fb6xTvhZ2znDsXHGHt2kcxjv8VYiKR0b5WscY2EBzgOTSegJ88FL6kHhERSSEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBEVSKLte0/iRs2ML/fdjdjuHifAICmvfYydiZtjuxDthfj3Q7GcZ8cDK8LK0LI7fSi4zsa97nFtLC7mHPHWRw72t8O93LoCobsQymyjiooo564EueA6OlBw5w7nOP1W+Hee7A5qhUV09W3szhsDeYhibtjb8h/ucnzVCaaSolfNNI6SWRxc97zkuJ6kleoamam7XsZXx9q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" alt="Aya Créations DZ" width="120" height="120">
+    <p class="foot-brand">© <span id="footYear">2026</span> Aya Créations DZ</p>
+    <p class="foot-txt">Tous droits réservés. Interdit de revendre ce produit.</p>
+  </footer>
+</main>
+
+<nav class="nav">
+  <div class="nav-in">
+    <button class="nb active" data-act="go" data-go="home"><svg viewBox="0 0 24 24"><path d="M4 11l8-6.5 8 6.5V20a1 1 0 01-1 1h-4.5v-6h-5v6H5a1 1 0 01-1-1z"/></svg>Accueil</button>
+    <button class="nb" data-act="go" data-go="dump"><svg viewBox="0 0 24 24"><path d="M7 18h10a4 4 0 00.6-7.95A6 6 0 006.2 9.3 4.4 4.4 0 007 18z"/></svg>Vider<span class="badge" id="b-dump"></span></button>
+    <button class="nb" data-act="go" data-go="now"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/></svg>Priorité<span class="badge" id="b-now"></span></button>
+    <button class="nb" data-act="go" data-go="vie"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.3-7-9.6A4 4 0 0112 8a4 4 0 017 2.4C19 15.7 12 20 12 20z"/></svg>Ma vie</button>
+    <button class="nb" data-act="go" data-go="calme"><svg viewBox="0 0 24 24"><path d="M12 20c-4-2.5-6-6-5-10 3 .5 5 2.5 5 5 0-2.5 2-4.5 5-5 1 4-1 7.5-5 10z"/><path d="M12 9c-1.5-2-1-4 0-5.5 1 1.5 1.5 3.5 0 5.5z"/></svg>Sérénité</button>
+  </div>
+</nav>
+<div class="toast" id="toast"></div>
+<div class="onb" id="onb" style="display:none">
+  <div class="onb-card">
+    <div class="onb-slide on" data-s="0">
+      <p class="lbl" style="text-align:center">Choisis ta langue</p>
+      <div class="lang onb-lang"><button data-act="lang" data-l="fr">FR</button><button data-act="lang" data-l="en">EN</button><button data-act="lang" data-l="ar">ع</button></div>
+      <div class="onb-ico">☁</div>
+      <h2>Vide ta tête</h2>
+      <p>Écris tout ce qui te pèse dans « Vider ma tête », une pensée par ligne. Ta tête n'a plus besoin de tout retenir.</p>
+    </div>
+    <div class="onb-slide" data-s="1">
+      <div class="onb-ico">⇄</div>
+      <h2>Trie en un geste</h2>
+      <p>Envoie chaque pensée au bon endroit : maintenant, à déléguer, cette semaine ou à ne pas oublier.</p>
+    </div>
+    <div class="onb-slide" data-s="2">
+      <div class="onb-ico">✦</div>
+      <h2>Une chose à la fois</h2>
+      <p>« Priorité » te montre seulement la prochaine étape. Le reste peut attendre.</p>
+    </div>
+    <div class="onb-slide" data-s="3">
+      <div class="onb-ico">❀</div>
+      <h2>Ta vie, ta sérénité</h2>
+      <p>Famille, cycle et dates dans « Ma vie ». Dhikr, activités apaisantes, soirée et bilan de la semaine dans « Sérénité ».</p>
+    </div>
+    <div class="dots" id="onbDots"><span class="on"></span><span></span><span></span><span></span></div>
+    <div class="onb-btns">
+      <button class="btn ghost" data-act="onbSkip">Passer</button>
+      <button class="btn primary" data-act="onbNext" id="onbNext">Suivant</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-bg" id="shareSheet">
+  <div class="sheet" role="dialog" aria-label="Copier">
+    <div class="grab"></div>
+    <h3>Texte copié ✓</h3>
+    <p class="hint" style="margin:0 0 10px">Colle-le dans WhatsApp, un SMS ou où tu veux.</p>
+    <textarea class="field" id="shPrev" readonly></textarea>
+    <button class="btn rose block" data-act="shCopy">Copier à nouveau</button>
+    <p class="hint">Si le collage ne marche pas : appuie longuement sur le texte ci-dessus, puis « Tout sélectionner » et « Copier ».</p>
+    <button class="btn primary block" data-act="shClose">Fermer</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var KEY = 'esprit_leger_planner_v1';
+  function $(s){return document.querySelector(s);}
+  function $$(s){return Array.prototype.slice.call(document.querySelectorAll(s));}
+  function esc(t){return String(t).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function pad(n){return n<10?'0'+n:''+n;}
+  function dkey(d){d=d||new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+  function wkey(){var d=new Date();d.setDate(d.getDate()-((d.getDay()+6)%7));return dkey(d);}
+  function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+
+  /* ---------- Langues · Languages · اللغات ---------- */
+  var D = {"Esprit Léger · Mental Load Planner": ["Esprit Léger · Mental Load Planner", "راحة البال · Esprit Léger"], "Aujourd'hui": ["Today", "اليوم"], "Bonjour": ["Hello", "مرحبًا"], "Dépose ta charge mentale ici. Ta tête n'est pas faite pour tout retenir.": ["Unload your mental load here. Your mind isn't meant to hold everything.", "ضعي حِملك الذهني هنا، فعقلك لم يُخلق ليحفظ كل شيء."], "Charge mentale": ["Mental load", "الحِمل الذهني"], "Légère": ["Light", "خفيف"], "Modérée": ["Moderate", "متوسط"], "Chargée": ["Heavy", "ثقيل"], "Saturée": ["Overloaded", "مُرهِق"], "Rituels du jour": ["Daily rituals", "طقوس اليوم"], "Que dois-je faire maintenant ?": ["What should I do now?", "ماذا أفعل الآن؟"], "Brain dump": ["Brain dump", "تفريغ الذهن"], "Je peux déléguer": ["I can delegate", "يمكنني التفويض"], "Cette semaine": ["This week", "هذا الأسبوع"], "À ne pas oublier": ["Don't forget", "لا أنسى"], "Evening brain dump": ["Evening brain dump", "تفريغ المساء"], "Weekly mental reset": ["Weekly mental reset", "إعادة الضبط الأسبوعية"], "Décompresser & apaiser l'âme": ["Unwind & soothe the soul", "الاسترخاء وطمأنينة الروح"], "Ma vie & mon foyer": ["My life & home", "حياتي وبيتي"], "Famille & enfants": ["Family & kids", "العائلة والأطفال"], "Cycle & énergie": ["Cycle & energy", "الدورة والطاقة"], "Dates & papiers": ["Dates & papers", "التواريخ والوثائق"], "Sauvegarde": ["Backup", "النسخ الاحتياطي"], "Ton prénom": ["Your first name", "اسمك"], "Vider sa tête": ["Empty your mind", "أفرغي ذهنك"], "Écris tout ce qui tourne dans ta tête, une pensée par ligne. Sans trier, sans juger.": ["Write down everything spinning in your head, one thought per line. No sorting, no judging.", "اكتبي كل ما يدور في رأسك، فكرة في كل سطر، بلا ترتيب ولا حكم."], "Libérer ma tête": ["Free my mind", "أريحي ذهنك"], "À trier": ["To sort", "للفرز"], "Envoie chaque pensée au bon endroit.": ["Send each thought to the right place.", "أرسلي كل فكرة إلى مكانها المناسب."], "Une chose à la fois": ["One thing at a time", "شيء واحد في كل مرة"], "Pas toute la liste. Juste la prochaine étape.": ["Not the whole list. Just the next step.", "ليس القائمة كلها، فقط الخطوة التالية."], "Mes priorités": ["My priorities", "أولوياتي"], "Conseil : garde 3 priorités maximum.": ["Tip: keep 3 priorities at most.", "نصيحة: احتفظي بثلاث أولويات كحد أقصى."], "Partager sur WhatsApp": ["Share on WhatsApp", "مشاركة عبر واتساب"], "Tu n'es pas seule": ["You're not alone", "لستِ وحدك"], "Ce que quelqu'un d'autre peut porter à ta place.": ["What someone else can carry for you.", "ما يمكن لغيرك أن يحمله عنك."], "Envoyer toute la liste sur WhatsApp": ["Send the whole list on WhatsApp", "إرسال القائمة كاملة عبر واتساب"], "Vue d'ensemble": ["Overview", "نظرة شاملة"], "Répartis la charge sur les jours pour respirer.": ["Spread the load over the days so you can breathe.", "وزّعي المهام على أيام الأسبوع لتتنفّسي."], "Ajouter": ["Add", "إضافة"], "Partager ma semaine sur WhatsApp": ["Share my week on WhatsApp", "مشاركة أسبوعي عبر واتساب"], "Mémoire externe": ["External memory", "ذاكرة خارجية"], "Les petites choses importantes qui encombrent l'esprit.": ["The small important things that clutter the mind.", "الأشياء الصغيرة المهمة التي تُثقل الذهن."], "Ce soir": ["Tonight", "هذا المساء"], "Pose ta journée avant de dormir. Demain s'en occupera.": ["Set your day down before sleep. Tomorrow will take care of it.", "ضعي يومك جانبًا قبل النوم، فللغد شأنه."], "Comment je me sens": ["How I feel", "كيف أشعر"], "Ce qui tourne encore dans ma tête": ["What's still on my mind", "ما زال يدور في رأسي"], "Envoyer vers le Brain dump": ["Send to Brain dump", "إرسال إلى تفريغ الذهن"], "3 petites victoires": ["3 small wins", "3 انتصارات صغيرة"], "Demain, je commence par…": ["Tomorrow, I'll start with…", "غدًا، سأبدأ بـ…"], "Mes soirées précédentes ›": ["My previous evenings ›", "أمسياتي السابقة ‹"], "Sérénité ·": ["Serenity ·", "الطمأنينة ·"], "Des gestes simples pour vider l'esprit et retrouver la paix intérieure.": ["Simple gestures to clear your mind and find inner peace.", "خطوات بسيطة لتصفية الذهن واستعادة السلام الداخلي."], "Mon dhikr du jour": ["My dhikr of the day", "ذكري اليومي"], "Remettre à zéro": ["Reset to zero", "إعادة العدّ من الصفر"], "Besoin d'une idée ?": ["Need an idea?", "تحتاجين فكرة؟"], "Laisse-toi guider": ["Let yourself be guided", "دعيني أرشدك"], "Une activité douce, choisie pour toi.": ["A gentle activity, chosen for you.", "نشاط لطيف مختار لكِ."], "Me proposer une activité": ["Suggest an activity", "اقترحي عليّ نشاطًا"], "Activités": ["Activities", "الأنشطة"], "Tout au même endroit": ["All in one place", "كل شيء في مكان واحد"], "Tout ce que tu es souvent la seule à savoir, enfin écrit quelque part.": ["Everything you're often the only one to know, finally written down.", "كل ما تعرفينه وحدك غالبًا، مكتوب أخيرًا في مكان واحد."], "À l'écoute de toi": ["Listening to yourself", "أنصتي لنفسك"], "Comprendre ton rythme pour ajuster ta charge, sans culpabiliser.": ["Understand your rhythm to adjust your load, guilt-free.", "افهمي إيقاعك لتعدّلي حِملك دون شعور بالذنب."], "Mes règles": ["My period", "دورتي الشهرية"], "Elles ont commencé aujourd'hui": ["It started today", "بدأت اليوم"], "Elles sont terminées aujourd'hui": ["It ended today", "انتهت اليوم"], "Ou indiquer le début à une autre date :": ["Or enter another start date:", "أو حدّدي تاريخ بداية آخر:"], "Mon énergie aujourd'hui": ["My energy today", "طاقتي اليوم"], "Mes 14 derniers jours": ["My last 14 days", "آخر 14 يومًا"], "Jours de jeûne à rattraper": ["Fasting days to make up", "أيام الصيام للقضاء"], "Note ici les jours de Ramadan manqués et coche chaque jour rattrapé.": ["Note the Ramadan days you missed and tick each day you make up.", "سجّلي هنا أيام رمضان الفائتة وعلّمي كل يوم تقضينه."], "Ne plus rien laisser filer": ["Never let anything slip again", "لن يفوتك شيء بعد اليوم"], "Anniversaires, papiers à renouveler, factures : je te préviens à l'avance sur l'accueil.": ["Birthdays, documents to renew, bills: I'll remind you ahead of time on the home screen.", "أعياد الميلاد، الوثائق للتجديد، الفواتير: أنبّهك مسبقًا في الصفحة الرئيسية."], "🎂 Anniversaire": ["🎂 Birthday", "🎂 عيد ميلاد"], "🪪 Papier à renouveler": ["🪪 Document to renew", "🪪 وثيقة للتجديد"], "🧾 Facture mensuelle": ["🧾 Monthly bill", "🧾 فاتورة شهرية"], "📅 Rendez-vous": ["📅 Appointment", "📅 موعد"], "📌 Autre": ["📌 Other", "📌 أخرى"], "Anniversaire : mets l'année de naissance pour voir l'âge. Papiers : alerte 2 mois avant l'expiration. Factures : chaque mois au même jour.": ["Birthday: enter the birth year to see the age. Documents: alert 2 months before expiry. Bills: every month on the same day.", "عيد الميلاد: أدخلي سنة الميلاد لرؤية العمر. الوثائق: تنبيه قبل شهرين من انتهاء الصلاحية. الفواتير: كل شهر في اليوم نفسه."], "Prochaines dates": ["Upcoming dates", "التواريخ القادمة"], "Tes données t'appartiennent": ["Your data belongs to you", "بياناتك ملكك"], "Garde une copie de tout ton planner pour changer de téléphone sans rien perdre.": ["Keep a copy of your whole planner to switch phones without losing anything.", "احتفظي بنسخة من مخطّطك كاملًا لتغيّري هاتفك دون أن تفقدي شيئًا."], "Sauvegarder": ["Back up", "حفظ نسخة"], "Télécharger ma sauvegarde (.json)": ["Download my backup (.json)", "تنزيل نسختي الاحتياطية (.json)"], "Copier le code de sauvegarde": ["Copy the backup code", "نسخ رمز النسخة الاحتياطية"], "M'envoyer la sauvegarde sur WhatsApp": ["Send the backup to myself on WhatsApp", "إرسال النسخة لنفسي عبر واتساب"], "Astuce : fais une sauvegarde une fois par mois et garde-la précieusement.": ["Tip: make a backup once a month and keep it safe.", "نصيحة: احفظي نسخة مرة كل شهر واحتفظي بها جيدًا."], "Restaurer": ["Restore", "الاستعادة"], "📂 Choisir un fichier de sauvegarde": ["📂 Choose a backup file", "📂 اختيار ملف النسخة الاحتياطية"], "Restaurer mes données": ["Restore my data", "استعادة بياناتي"], "Attention : la restauration remplace les données actuelles de ce téléphone.": ["Warning: restoring replaces the current data on this phone.", "تنبيه: الاستعادة تستبدل البيانات الحالية على هذا الهاتف."], "Un rituel hebdomadaire pour repartir légère.": ["A weekly ritual to start afresh, lighter.", "طقس أسبوعي لتنطلقي من جديد بخفّة."], "Mon rituel": ["My ritual", "طقسي"], "Prends 20 minutes rien que pour toi.": ["Take 20 minutes just for you.", "خذي 20 دقيقة لنفسك فقط."], "Ce qui m'a pesé cette semaine": ["What weighed on me this week", "ما أثقلني هذا الأسبوع"], "Ce que je choisis de lâcher": ["What I choose to let go of", "ما أختار أن أتركه"], "Mon intention pour la semaine": ["My intention for the week", "نيّتي لهذا الأسبوع"], "Grand ménage": ["Big clean-up", "تنظيف شامل"], "Supprime toutes les tâches déjà terminées, dans toutes les listes.": ["Deletes all completed tasks from every list.", "يحذف كل المهام المنجزة من جميع القوائم."], "Effacer les tâches terminées": ["Clear completed tasks", "مسح المهام المنجزة"], "Accueil": ["Home", "الرئيسية"], "Vider": ["Unload", "تفريغ"], "Focus": ["Focus", "تركيز"], "Sérénité": ["Serenity", "طمأنينة"], "Soir": ["Evening", "المساء"], "Reset": ["Reset", "ضبط"], "Partager": ["Share", "مشاركة"], "Ouvrir WhatsApp": ["Open WhatsApp", "فتح واتساب"], "Copier le texte": ["Copy the text", "نسخ النص"], "Autre application…": ["Another app…", "تطبيق آخر…"], "WhatsApp ne s'ouvre pas ? Essayer le lien web": ["WhatsApp won't open? Try the web link", "واتساب لا يفتح؟ جرّبي رابط الويب"], "Si rien ne s'ouvre, c'est l'application d'aperçu qui bloque les liens externes. Touche « Copier le texte », puis colle-le dans WhatsApp.": ["If nothing opens, the preview app is blocking external links. Tap “Copy the text”, then paste it into WhatsApp.", "إذا لم يُفتح شيء، فتطبيق المعاينة يمنع الروابط الخارجية. اضغطي «نسخ النص» ثم الصقيه في واتساب."], "Fermer": ["Close", "إغلاق"], "Copier la liste": ["Copy the list", "نسخ القائمة"], "Copier ma semaine": ["Copy my week", "نسخ أسبوعي"], "Copier la demande": ["Copy the request", "نسخ الطلب"], "Copier la fiche": ["Copy the profile", "نسخ البطاقة"], "Texte copié ✓": ["Text copied ✓", "تمّ نسخ النص ✓"], "Colle-le dans WhatsApp, un SMS ou où tu veux.": ["Paste it into WhatsApp, a text message or anywhere you like.", "الصقيه في واتساب أو رسالة أو أي مكان تريدين."], "Copier à nouveau": ["Copy again", "النسخ مرة أخرى"], "Si le collage ne marche pas : appuie longuement sur le texte ci-dessus, puis « Tout sélectionner » et « Copier ».": ["If pasting doesn't work: long-press the text above, then “Select all” and “Copy”.", "إذا لم ينجح اللصق: اضغطي مطوّلًا على النص أعلاه، ثم «تحديد الكل» و«نسخ»."], "Ma priorité du moment": ["My priority right now", "أولويتي الآن"], "Rien de prévu pour l'instant.": ["Nothing planned for now.", "لا شيء مخطّط حاليًا."], "Tout voir": ["See all", "عرض الكل"], "Vider ma tête": ["Empty my mind", "تفريغ الذهن"], "Étape 1 · Écrire": ["Step 1 · Write", "الخطوة 1 · اكتبي"], "Vider ma <em>tête</em>": ["Empty my <em>mind</em>", "تفريغ <em>الذهن</em>"], "Mes listes": ["My lists", "قوائمي"], "Mon soir": ["My evening", "مسائي"], "Mon <em>soir</em>": ["My <em>evening</em>", "<em>مسائي</em>"], "Bilan de la semaine": ["Weekly review", "حصيلة الأسبوع"], "Bilan de la <em>semaine</em>": ["Weekly <em>review</em>", "حصيلة <em>الأسبوع</em>"], "Alléger mes listes": ["Lighten my lists", "تخفيف قوائمي"], "Efface les tâches déjà cochées, dans toutes les listes, pour repartir sur des listes propres.": ["Clears the tasks you've already ticked, in every list, so you start again with clean lists.", "يمسح المهام المُنجزة من كل القوائم لتبدئي من جديد بقوائم نظيفة."], "Encore des pensées ? Vide-les ici": ["More thoughts? Empty them here", "أفكار أخرى؟ أفرغيها هنا"], "Je peux t'en proposer une parmi tes pensées à trier.": ["I can suggest one from your thoughts to sort.", "يمكنني أن أقترح عليك واحدة من أفكارك التي تنتظر الترتيب."], "{n} choses en tête. Respire, délègue, et fais ton bilan de la semaine.": ["{n} things on your mind. Breathe, delegate, and do your weekly review.", "{n} أمرًا في ذهنك. تنفّسي، فوّضي، وقومي بحصيلة الأسبوع."], "Bilan terminé. Tu peux être fière de toi ✿": ["Review complete. You can be proud of yourself ✿", "اكتملت الحصيلة. يحقّ لكِ أن تفخري بنفسك ✿"], "Priorité": ["Priority", "أولويتي"], "Ma vie": ["My life", "حياتي"], "Rituels": ["Rituals", "طقوسي"], "Mes rituels": ["My rituals", "طقوسي"], "Ce que tu portes": ["What you carry", "ما تحملينه"], "Ma <em>vie</em>": ["My <em>life</em>", "<em>حياتي</em>"], "Famille, cycle, rappels et dates importantes : tout ce que tu portes, au même endroit.": ["Family, cycle, reminders and important dates: everything you carry, in one place.", "العائلة، الدورة، التذكيرات والتواريخ المهمة: كل ما تحملينه في مكان واحد."], "Prendre soin de toi": ["Taking care of yourself", "الاعتناء بنفسك"], "Mes <em>rituels</em>": ["My <em>rituals</em>", "<em>طقوسي</em>"], "Des moments pour souffler, prier, faire le point et finir la journée en paix.": ["Moments to breathe, pray, take stock and end the day in peace.", "لحظات لتتنفّسي وتصلّي وتراجعي يومك وتختميه بسلام."], "Les petites choses à retenir et les dates importantes : je te préviens à l'avance sur l'accueil.": ["The little things to remember and important dates: I'll remind you ahead of time on the home screen.", "الأشياء الصغيرة التي يجب تذكّرها والتواريخ المهمة: أنبّهك مسبقًا في الصفحة الرئيسية."], "Petits rappels": ["Little reminders", "تذكيرات صغيرة"], "Sans date, juste à ne pas oublier.": ["No date, just things not to forget.", "بلا تاريخ، فقط كي لا أنساها."], "{n} élément": ["{n} item", "{n} عنصر"], "{n} éléments": ["{n} items", "{n} عناصر"], "Revoir le guide": ["See the guide again", "إعادة عرض الدليل"], "Choisis ta langue": ["Choose your language", "اختاري لغتك"], "Vide ta tête": ["Empty your mind", "أفرغي ذهنك"], "Écris tout ce qui te pèse dans « Vider ma tête », une pensée par ligne. Ta tête n'a plus besoin de tout retenir.": ["Write everything weighing on you in “Empty my mind”, one thought per line. Your mind no longer has to hold it all.", "اكتبي كل ما يُثقلك في «تفريغ الذهن»، فكرة في كل سطر. لم يعد على ذهنك أن يحفظ كل شيء."], "Trie en un geste": ["Sort in one tap", "رتّبي بلمسة واحدة"], "Envoie chaque pensée au bon endroit : maintenant, à déléguer, cette semaine ou à ne pas oublier.": ["Send each thought to the right place: now, to delegate, this week or don't forget.", "أرسلي كل فكرة إلى مكانها: الآن، للتفويض، هذا الأسبوع، أو لا أنسى."], "« Priorité » te montre seulement la prochaine étape. Le reste peut attendre.": ["“Priority” only shows you the next step. The rest can wait.", "«أولويتي» تُظهر لكِ الخطوة التالية فقط، والباقي يمكنه الانتظار."], "Ta vie, tes rituels": ["Your life, your rituals", "حياتكِ وطقوسكِ"], "Famille, cycle et dates dans « Ma vie ». Dhikr, soirée et bilan de la semaine dans « Rituels ».": ["Family, cycle and dates in “My life”. Dhikr, evening and weekly review in “Rituals”.", "العائلة والدورة والتواريخ في «حياتي». الذكر والمساء وحصيلة الأسبوع في «طقوسي»."], "Passer": ["Skip", "تخطّي"], "Suivant": ["Next", "التالي"], "Commencer": ["Let's start", "لنبدأ"], "Ta vie, ta sérénité": ["Your life, your serenity", "حياتكِ وطمأنينتكِ"], "Famille, cycle et dates dans « Ma vie ». Dhikr, activités apaisantes, soirée et bilan de la semaine dans « Sérénité ».": ["Family, cycle and dates in “My life”. Dhikr, soothing activities, evening and weekly review in “Serenity”.", "العائلة والدورة والتواريخ في «حياتي». الذكر والأنشطة المريحة والمساء وحصيلة الأسبوع في «طمأنينة»."], "Tous droits réservés. Interdit de revendre ce produit.": ["All rights reserved. Reselling this product is prohibited.", "جميع الحقوق محفوظة. يُمنع إعادة بيع هذا المنتج."], "Ex. Sarah": ["e.g. Sarah", "مثال: سارة"], "Prendre RDV pédiatre\nAcheter cadeau anniversaire\nRépondre à la maîtresse\n…": ["Book a pediatrician appointment\nBuy a birthday present\nReply to the teacher\n…", "حجز موعد عند طبيب الأطفال\nشراء هدية عيد ميلاد\nالرد على المعلّمة\n…"], "Ajouter une priorité…": ["Add a priority…", "أضيفي أولوية…"], "La tâche…": ["The task…", "المهمة…"], "À qui ? (partenaire, enfant…)": ["To whom? (partner, child…)", "لمن؟ (الزوج، أحد الأبناء…)"], "Ajouter une tâche…": ["Add a task…", "أضيفي مهمة…"], "Ex. Signer le carnet de liaison": ["e.g. Sign the school notebook", "مثال: توقيع دفتر المراسلة"], "Une pensée par ligne…": ["One thought per line…", "فكرة في كل سطر…"], "Une seule chose": ["Just one thing", "شيء واحد فقط"], "Ex. Passeport de Yasmine, Anniversaire maman…": ["e.g. Yasmine's passport, Mum's birthday…", "مثال: جواز سفر ياسمين، عيد ميلاد أمي…"], "…ou colle ici ton code de sauvegarde": ["…or paste your backup code here", "…أو الصقي رمز النسخة الاحتياطية هنا"], "Brain <em>dump</em>": ["Brain <em>dump</em>", "تفريغ <em>الذهن</em>"], "Que dois-je faire <em>maintenant</em> ?": ["What should I do <em>now</em>?", "ماذا أفعل <em>الآن</em>؟"], "Je peux <em>déléguer</em>": ["I can <em>delegate</em>", "يمكنني <em>التفويض</em>"], "Cette <em>semaine</em>": ["This <em>week</em>", "هذا <em>الأسبوع</em>"], "À ne pas <em>oublier</em>": ["Don't <em>forget</em>", "لا <em>أنسى</em>"], "Evening <em>brain dump</em>": ["Evening <em>brain dump</em>", "تفريغ <em>المساء</em>"], "Décompresser &amp; <em>apaiser l'âme</em>": ["Unwind &amp; <em>soothe the soul</em>", "استرخاء و<em>طمأنينة الروح</em>"], "Famille &amp; <em>enfants</em>": ["Family &amp; <em>kids</em>", "العائلة و<em>الأطفال</em>"], "Cycle &amp; <em>énergie</em>": ["Cycle &amp; <em>energy</em>", "الدورة و<em>الطاقة</em>"], "Dates &amp; <em>papiers</em>": ["Dates &amp; <em>papers</em>", "التواريخ و<em>الوثائق</em>"], "Sauvegarde &amp; <em>restauration</em>": ["Backup &amp; <em>restore</em>", "النسخ و<em>الاستعادة</em>"], "Weekly <em>mental reset</em>": ["Weekly <em>mental reset</em>", "إعادة <em>الضبط الأسبوعية</em>"], "Lundi": ["Monday", "الإثنين"], "Mardi": ["Tuesday", "الثلاثاء"], "Mercredi": ["Wednesday", "الأربعاء"], "Jeudi": ["Thursday", "الخميس"], "Vendredi": ["Friday", "الجمعة"], "Samedi": ["Saturday", "السبت"], "Dimanche": ["Sunday", "الأحد"], "Flexible": ["Flexible", "مرن"], "💧 Boire de l'eau": ["💧 Drink water", "💧 شرب الماء"], "☕ Une vraie pause": ["☕ A real break", "☕ استراحة حقيقية"], "🌿 Respirer 5 min": ["🌿 Breathe 5 min", "🌿 تنفّس 5 دقائق"], "🚶‍♀️ Bouger": ["🚶‍♀️ Move", "🚶‍♀️ الحركة"], "💗 Temps pour moi": ["💗 Me time", "💗 وقت لنفسي"], "🌙 Dormir tôt": ["🌙 Early night", "🌙 النوم مبكرًا"], "📿 Istighfar": ["📿 Istighfar", "📿 الاستغفار"], "📖 Coran": ["📖 Quran", "📖 القرآن"], "Épuisée": ["Exhausted", "منهَكة"], "Fatiguée": ["Tired", "متعبة"], "Neutre": ["Neutral", "عادية"], "Apaisée": ["Calm", "مرتاحة"], "Sereine": ["Serene", "مطمئنة"], "Vider complètement ma tête": ["Fully empty my mind", "إفراغ ذهني تمامًا"], "Relire ce qui reste à faire": ["Review what's left to do", "مراجعة ما تبقّى من مهام"], "Supprimer ce qui n'est plus important": ["Delete what no longer matters", "حذف ما لم يعد مهمًا"], "Choisir 3 priorités pour la semaine": ["Choose 3 priorities for the week", "اختيار 3 أولويات للأسبوع"], "Déléguer au moins une chose": ["Delegate at least one thing", "تفويض مهمة واحدة على الأقل"], "Planifier les repas & les courses": ["Plan meals & shopping", "تخطيط الوجبات والمشتريات"], "Bloquer un moment rien que pour moi": ["Block out time just for me", "تخصيص وقت لنفسي فقط"], "Célébrer une victoire de la semaine": ["Celebrate a win of the week", "الاحتفال بإنجاز هذا الأسبوع"], "⚡ Maintenant": ["⚡ Now", "⚡ الآن"], "⇄ Déléguer": ["⇄ Delegate", "⇄ تفويض"], "◷ Semaine": ["◷ Week", "◷ الأسبوع"], "❦ Ne pas oublier": ["❦ Don't forget", "❦ لا أنسى"], "Maintenant": ["Now", "الآن"], "Déléguer": ["Delegate", "تفويض"], "Tu n'as pas à tout porter seule.": ["You don't have to carry it all alone.", "لستِ مضطرة لحمل كل شيء وحدك."], "Ce qui est écrit n'a plus besoin d'être retenu.": ["What's written down no longer needs remembering.", "ما يُكتب لا يحتاج أن يُحفظ."], "Une chose à la fois, c'est déjà beaucoup.": ["One thing at a time is already a lot.", "شيء واحد في كل مرة، وهذا كثير."], "Le repos fait aussi partie du plan.": ["Rest is part of the plan too.", "الراحة جزء من الخطة أيضًا."], "Fait vaut mieux que parfait.": ["Done is better than perfect.", "المُنجَز خير من المثالي."], "Ton calme est une priorité, pas une récompense.": ["Your calm is a priority, not a reward.", "هدوؤك أولوية، لا مكافأة."], "Lâcher prise, c'est aussi avancer.": ["Letting go is moving forward too.", "التخلّي أيضًا تقدّم."], "Spirituel": ["Spiritual", "روحاني"], "Corps": ["Body", "الجسد"], "Esprit": ["Mind", "الذهن"], "Lien & nature": ["Connection & nature", "التواصل والطبيعة"], "Istighfar · <span class=\"ar\">أستغفر الله</span>": ["Istighfar · <span class=\"ar\">أستغفر الله</span>", "الاستغفار · <span class=\"ar\">أستغفر الله</span>"], "100 fois, lentement, avec le cœur": ["100 times, slowly, from the heart", "100 مرة، ببطء وبحضور القلب"], "Lire le Coran · <span class=\"ar\">قراءة القرآن</span>": ["Read the Quran · <span class=\"ar\">قراءة القرآن</span>", "قراءة القرآن"], "Une page, une sourate ou quelques versets": ["A page, a surah or a few verses", "صفحة أو سورة أو بضع آيات"], "Adhkar du matin · <span class=\"ar\">أذكار الصباح</span>": ["Morning adhkar · <span class=\"ar\">أذكار الصباح</span>", "أذكار الصباح"], "Pour commencer la journée protégée": ["To start the day protected", "لتبدئي يومك في حفظ الله"], "Adhkar du soir · <span class=\"ar\">أذكار المساء</span>": ["Evening adhkar · <span class=\"ar\">أذكار المساء</span>", "أذكار المساء"], "Pour poser la journée entre Ses mains": ["To place your day in His hands", "لتضعي يومك بين يديه"], "Faire des douas · <span class=\"ar\">الدعاء</span>": ["Make dua · <span class=\"ar\">الدعاء</span>", "الدعاء"], "Confier à Allah ce qui me pèse": ["Entrust to Allah what weighs on me", "أن أُفوّض إلى الله ما يُثقلني"], "Tasbih · <span class=\"ar\">سبحان الله، الحمد لله، الله أكبر</span>": ["Tasbih · <span class=\"ar\">سبحان الله، الحمد لله، الله أكبر</span>", "التسبيح · <span class=\"ar\">سبحان الله، الحمد لله، الله أكبر</span>"], "33 fois chacun après la prière": ["33 times each after prayer", "33 مرة لكل منها بعد الصلاة"], "Salawat · <span class=\"ar\">الصلاة على النبي</span>": ["Salawat · <span class=\"ar\">الصلاة على النبي</span>", "الصلاة على النبي"], "Envoyer la prière sur le Prophète (paix et bénédictions sur lui)": ["Send blessings upon the Prophet (peace be upon him)", "الإكثار من الصلاة والسلام على رسول الله"], "Prier à l'heure avec khushu'": ["Pray on time with khushu'", "الصلاة في وقتها بخشوع"], "Vivre la prière comme une pause de l'âme": ["Live prayer as a pause for the soul", "أن تكون الصلاة راحة للروح"], "Sourate Al-Mulk · <span class=\"ar\">سورة الملك</span>": ["Surah Al-Mulk · <span class=\"ar\">سورة الملك</span>", "سورة الملك"], "Avant de dormir": ["Before sleeping", "قبل النوم"], "Tadabbur · <span class=\"ar\">التدبر</span>": ["Tadabbur · <span class=\"ar\">التدبر</span>", "التدبّر"], "Méditer un seul verset et noter ce qu'il m'inspire": ["Reflect on a single verse and note what it inspires", "تدبّر آية واحدة وكتابة ما توحيه لي"], "Écouter une récitation du Coran": ["Listen to a Quran recitation", "الاستماع إلى تلاوة القرآن"], "Se laisser apaiser par la parole d'Allah": ["Let Allah's words soothe you", "أن يطمئن القلب بكلام الله"], "Prière de la nuit · <span class=\"ar\">قيام الليل</span>": ["Night prayer · <span class=\"ar\">قيام الليل</span>", "قيام الليل"], "Deux rakaat dans le calme de la nuit": ["Two rak'ahs in the stillness of the night", "ركعتان في سكون الليل"], "Respiration 4-7-8": ["4-7-8 breathing", "تنفّس 4-7-8"], "Inspirer 4 s, retenir 7 s, expirer 8 s · 4 cycles": ["Inhale 4 s, hold 7 s, exhale 8 s · 4 rounds", "شهيق 4 ثوانٍ، حبس 7، زفير 8 · 4 مرات"], "Marcher 15 minutes": ["Walk 15 minutes", "المشي 15 دقيقة"], "Dehors, sans téléphone si possible": ["Outdoors, without your phone if possible", "في الخارج، دون هاتف إن أمكن"], "Étirements doux": ["Gentle stretching", "تمارين تمدّد لطيفة"], "5 minutes pour relâcher nuque et épaules": ["5 minutes to release neck and shoulders", "5 دقائق لإرخاء الرقبة والكتفين"], "Douche ou bain chaud": ["Warm shower or bath", "حمّام دافئ"], "Laisser l'eau emporter les tensions": ["Let the water wash the tension away", "دعي الماء يأخذ التوتر بعيدًا"], "Une tisane en silence": ["Herbal tea in silence", "شاي أعشاب في هدوء"], "Camomille, verveine ou menthe, assise, sans rien faire d'autre": ["Chamomile, verbena or mint, sitting down, doing nothing else", "بابونج أو لويزة أو نعناع، جالسة، دون فعل أي شيء آخر"], "Faire ses ablutions (wudu)": ["Make wudu", "الوضوء"], "Rafraîchir le corps et apaiser la colère": ["Refresh the body and calm anger", "ينعش الجسد ويُطفئ الغضب"], "Une sieste courte (qaylula)": ["A short nap (qaylula)", "قيلولة قصيرة"], "15 à 20 minutes, une sunna qui repose": ["15 to 20 minutes, a restful sunnah", "15 إلى 20 دقيقة، سنّة مريحة"], "Écrire 3 gratitudes": ["Write 3 gratitudes", "كتابة 3 نِعَم"], "<span class=\"ar\">الحمد لله</span> pour trois choses précises": ["<span class=\"ar\">الحمد لله</span> for three specific things", "الحمد لله على ثلاثة أشياء محددة"], "Journal libre 5 minutes": ["Free journaling 5 minutes", "كتابة حرّة 5 دقائق"], "Écrire sans s'arrêter, sans se relire": ["Write without stopping or rereading", "اكتبي دون توقّف ودون مراجعة"], "Déconnexion 30 minutes": ["30-minute disconnect", "ابتعاد عن الشاشات 30 دقيقة"], "Téléphone dans une autre pièce": ["Phone in another room", "الهاتف في غرفة أخرى"], "Lire un livre bienfaisant": ["Read an uplifting book", "قراءة كتاب نافع"], "Quelques pages d'un livre qui nourrit l'âme": ["A few pages of a book that nourishes the soul", "بضع صفحات من كتاب يغذّي الروح"], "Coloriage ou dessin": ["Colouring or drawing", "التلوين أو الرسم"], "Occuper les mains, reposer la tête": ["Busy hands, resting mind", "اشغلي يديكِ وأريحي ذهنكِ"], "Ranger un petit coin": ["Tidy a small corner", "ترتيب ركن صغير"], "Un tiroir, une étagère : petit ordre, grand calme": ["A drawer, a shelf: a little order, a lot of calm", "درج أو رفّ: ترتيب صغير وهدوء كبير"], "S'occuper des plantes": ["Tend to the plants", "الاعتناء بالنباتات"], "Arroser, observer, prendre son temps": ["Water, observe, take your time", "سقي وتأمّل دون استعجال"], "Prendre l'air et la lumière": ["Get fresh air and light", "استنشاق الهواء والضوء"], "10 minutes à la fenêtre ou au balcon": ["10 minutes at the window or on the balcony", "10 دقائق عند النافذة أو في الشرفة"], "Appeler une personne chère": ["Call a loved one", "الاتصال بشخص عزيز"], "Parent, sœur, amie · silat ar-rahim": ["Parent, sister, friend · silat ar-rahim", "أحد الوالدين، أخت، صديقة · صلة الرحم"], "Un geste de bonté": ["An act of kindness", "عمل طيّب"], "Une sadaqa, un mot gentil, un service rendu": ["A sadaqa, a kind word, a favour", "صدقة، كلمة طيبة، أو خدمة"], "Contempler la nature": ["Contemplate nature", "التأمّل في الطبيعة"], "Le ciel, les arbres · méditer la création d'Allah": ["The sky, the trees · reflect on Allah's creation", "السماء والأشجار · التفكّر في خلق الله"], "Câlin ou moment avec les enfants": ["A cuddle or time with the kids", "حضن أو وقت مع الأطفال"], "Être présente, sans écran": ["Be present, no screens", "حضور كامل دون شاشات"], "À qui ?": ["To whom?", "لمن؟"], "Demander sur WhatsApp": ["Ask on WhatsApp", "اطلبي عبر واتساب"], "Ta tête est légère pour le moment.": ["Your mind is light for now.", "ذهنك خفيف في الوقت الحالي."], "Aucune priorité. Respire.": ["No priorities. Breathe.", "لا أولويات. تنفّسي."], "Rien à déléguer… pour l'instant.": ["Nothing to delegate… for now.", "لا شيء للتفويض… حاليًا."], "Rien d'important à retenir. Parfait.": ["Nothing important to remember. Perfect.", "لا شيء مهم لتتذكّريه. ممتاز."], "{n} restante": ["{n} left", "{n} متبقية"], "{n} restantes": ["{n} left", "{n} متبقية"], "Ta semaine est encore toute douce.": ["Your week is still nice and gentle.", "أسبوعك ما زال هادئًا."], "Ta seule priorité, là, tout de suite": ["Your one priority, right now", "أولويتك الوحيدة، الآن"], "Le reste peut attendre.": ["The rest can wait.", "الباقي يمكنه الانتظار."], "C'est fait ✓": ["Done ✓", "تمّ ✓"], "Plus tard": ["Later", "لاحقًا"], "Rien d'urgent": ["Nothing urgent", "لا شيء عاجل"], "Choisis une seule chose.": ["Choose just one thing.", "اختاري شيئًا واحدًا فقط."], "Je peux t'en proposer une depuis ton brain dump.": ["I can suggest one from your brain dump.", "يمكنني أن أقترح عليك واحدة من تفريغ ذهنك."], "Me proposer une tâche": ["Suggest a task", "اقترحي عليّ مهمة"], "{n} en cours": ["{n} in progress", "{n} قيد الإنجاز"], "Ton esprit est clair. Profite de cet espace.": ["Your mind is clear. Enjoy the space.", "ذهنك صافٍ. استمتعي بهذه المساحة."], "{n} chose en tête. Tout va bien.": ["{n} thing on your mind. All good.", "أمر واحد في ذهنك. كل شيء بخير."], "{n} choses en tête. Tout va bien.": ["{n} things on your mind. All good.", "{n} أمور في ذهنك. كل شيء بخير."], "{n} choses en tête. Pense à trier et déléguer.": ["{n} things on your mind. Remember to sort and delegate.", "{n} أمرًا في ذهنك. فكّري في الفرز والتفويض."], "{n} choses en tête. Choisis 3 priorités, laisse le reste.": ["{n} things on your mind. Pick 3 priorities, let the rest go.", "{n} أمرًا في ذهنك. اختاري 3 أولويات واتركي الباقي."], "{n} choses en tête. Respire, délègue, et fais un mental reset.": ["{n} things on your mind. Breathe, delegate, and do a mental reset.", "{n} أمرًا في ذهنك. تنفّسي، فوّضي، وأعيدي ضبط ذهنك."], "Énergie basse aujourd'hui : une seule priorité suffit.": ["Low energy today: one priority is enough.", "طاقتك منخفضة اليوم: أولوية واحدة تكفي."], "Tes soirées apparaîtront ici.": ["Your evenings will appear here.", "ستظهر أمسياتك هنا."], "Rempli ce soir ✓": ["Filled in tonight ✓", "تمّ هذا المساء ✓"], "Reset terminé. Tu peux être fière de toi ✿": ["Reset complete. You can be proud of yourself ✿", "اكتمل الضبط. يحقّ لكِ أن تفخري بنفسك ✿"], "{n}% fait": ["{n}% done", "{n}% منجز"], "{n} faite aujourd'hui": ["{n} done today", "{n} منجز اليوم"], "{n} faites aujourd'hui": ["{n} done today", "{n} منجزة اليوم"], "Objectif atteint ✓": ["Goal reached ✓", "تمّ الهدف ✓"], "Objectif atteint ✿": ["Goal reached ✿", "تمّ الهدف ✿"], "aujourd'hui": ["today", "اليوم"], "demain": ["tomorrow", "غدًا"], "dans {n} j": ["in {n} d", "بعد {n} أيام"], "il y a {n} j": ["{n} d ago", "منذ {n} أيام"], "La liste est vide": ["The list is empty", "القائمة فارغة"], "🤍 Petit coup de main ?": ["🤍 A little help?", "🤍 هل يمكنك مساعدتي؟"], "Merci beaucoup !": ["Thank you so much!", "شكرًا جزيلًا!"], "🗓 Cette semaine": ["🗓 This week", "🗓 هذا الأسبوع"], "📌 À ne pas oublier": ["📌 Don't forget", "📌 لا أنسى"], "✦ Mes priorités": ["✦ My priorities", "✦ أولوياتي"], "Salam 🤍\nPeux-tu t'occuper de ceci, s'il te plaît ?": ["Hi 🤍\nCould you please take care of this?", "السلام عليكم 🤍\nهل يمكنك التكفّل بهذا من فضلك؟"], "Toucher encore pour confirmer": ["Tap again to confirm", "اضغطي مرة أخرى للتأكيد"], "Prénom": ["First name", "الاسم"], "Date de naissance": ["Date of birth", "تاريخ الميلاد"], "École & classe": ["School & class", "المدرسة والقسم"], "Médecin / pédiatre (nom, téléphone)": ["Doctor / pediatrician (name, phone)", "الطبيب / طبيب الأطفال (الاسم، الهاتف)"], "Groupe sanguin": ["Blood type", "فصيلة الدم"], "Allergies & santé": ["Allergies & health", "الحساسية والصحة"], "Taille vêtements": ["Clothing size", "مقاس الملابس"], "Pointure": ["Shoe size", "مقاس الحذاء"], "Notes (goûts, amis, peurs…)": ["Notes (likes, friends, fears…)", "ملاحظات (ما يحب، الأصدقاء، المخاوف…)"], "🩺 Médecin": ["🩺 Doctor", "🩺 طبيب"], "💉 Vaccin": ["💉 Vaccine", "💉 تلقيح"], "🎒 École": ["🎒 School", "🎒 المدرسة"], "⚽ Activité": ["⚽ Activity", "⚽ نشاط"], "{n} an": ["{n} yr", "{n} سنة"], "{n} ans": ["{n} yrs", "{n} سنوات"], "{n} mois": ["{n} mo", "{n} أشهر"], "Enfant": ["Child", "طفل"], "+ Ajouter": ["+ Add", "+ إضافة"], "Ajouter un enfant": ["Add a child", "إضافة طفل"], "Ajoute ton premier enfant": ["Add your first child", "أضيفي طفلك الأول"], "Une fiche par enfant : santé, école, tailles, rendez-vous.": ["One profile per child: health, school, sizes, appointments.", "بطاقة لكل طفل: الصحة، المدرسة، المقاسات، المواعيد."], "Fiche de {x}": ["{x}'s profile", "بطاقة {x}"], "Partager la fiche sur WhatsApp": ["Share the profile on WhatsApp", "مشاركة البطاقة عبر واتساب"], "Agenda": ["Schedule", "المواعيد"], "Ex. Rappel vaccin, réunion parents…": ["e.g. Vaccine booster, parents' meeting…", "مثال: جرعة تلقيح، اجتماع أولياء التلاميذ…"], "Ajouter à l'agenda": ["Add to schedule", "إضافة إلى المواعيد"], "Supprimer cette fiche": ["Delete this profile", "حذف هذه البطاقة"], "Aucun rendez-vous prévu.": ["No appointments planned.", "لا توجد مواعيد."], "👧 Fiche de {x}": ["👧 {x}'s profile", "👧 بطاقة {x}"], "📅 À venir": ["📅 Coming up", "📅 قريبًا"], "Vide": ["Empty", "منعدمة"], "Basse": ["Low", "منخفضة"], "Moyenne": ["Medium", "متوسطة"], "Bonne": ["Good", "جيدة"], "Pleine": ["Full", "كاملة"], "Règles": ["Period", "الحيض"], "Énergie souvent plus basse. Allège ta liste, délègue davantage et repose-toi sans culpabilité.": ["Energy is often lower. Lighten your list, delegate more and rest without guilt.", "الطاقة غالبًا أقل. خفّفي قائمتك، فوّضي أكثر، واستريحي دون شعور بالذنب."], "Phase folliculaire": ["Follicular phase", "المرحلة الجُرَيبية"], "L'énergie remonte : bon moment pour organiser, planifier et lancer ce qui attend.": ["Energy is rising: a good time to organise, plan and start what's waiting.", "الطاقة ترتفع: وقت مناسب للتنظيم والتخطيط والبدء فيما ينتظر."], "Période d'ovulation": ["Ovulation", "فترة الإباضة"], "Souvent un pic d'énergie : idéal pour les rendez-vous, les appels et les tâches qui demandent de l'élan.": ["Often an energy peak: ideal for appointments, calls and tasks that need momentum.", "غالبًا ذروة الطاقة: مثالية للمواعيد والمكالمات والمهام التي تحتاج حماسًا."], "Phase lutéale": ["Luteal phase", "المرحلة الأصفرية"], "Fatigue et sensibilité possibles : simplifie, prévois des repas faciles et protège ton sommeil.": ["Possible fatigue and sensitivity: simplify, plan easy meals and protect your sleep.", "قد تشعرين بالتعب والحساسية: بسّطي، حضّري وجبات سهلة، واحمي نومك."], "Retard de {n} j": ["{n} days late", "تأخر {n} أيام"], "Les cycles varient. Si le retard se prolonge ou t'inquiète, parles-en à un professionnel de santé.": ["Cycles vary. If the delay continues or worries you, talk to a health professional.", "الدورات تختلف. إذا طال التأخر أو أقلقك، استشيري مختصًا في الصحة."], "Cette date est déjà notée": ["This date is already recorded", "هذا التاريخ مسجّل مسبقًا"], "Mon cycle": ["My cycle", "دورتي"], "Commençons ensemble": ["Let's start together", "لنبدأ معًا"], "Indique le début de tes dernières règles juste en dessous.": ["Enter the start of your last period just below.", "أدخلي تاريخ بداية آخر دورة في الأسفل."], "Jour {n} du cycle": ["Cycle day {n}", "اليوم {n} من الدورة"], "Prochaines règles estimées : {d} ({x})": ["Next period estimated: {d} ({x})", "الدورة القادمة المتوقعة: {d} ({x})"], "en retard": ["late", "متأخرة"], "Cycle moyen : {n} j · estimation indicative, pas un avis médical": ["Average cycle: {n} days · an estimate, not medical advice", "متوسط الدورة: {n} يومًا · تقدير تقريبي وليس رأيًا طبيًا"], "en cours": ["ongoing", "جارية"], "{n} jour": ["{n} day", "{n} يوم"], "{n} jours": ["{n} days", "{n} أيام"], "jour à rattraper": ["day to make up", "يوم للقضاء"], "jours à rattraper": ["days to make up", "أيام للقضاء"], "{n} jour déjà rattrapé": ["{n} day already made up", "{n} يوم تمّ قضاؤه"], "{n} jours déjà rattrapés": ["{n} days already made up", "{n} أيام تمّ قضاؤها"], "tout est rattrapé ✿": ["all made up ✿", "تمّ القضاء كاملًا ✿"], "J'ai jeûné un jour ✓": ["I fasted one day ✓", "صمتُ يومًا ✓"], "Jour {n}": ["Day {n}", "اليوم {n}"], "Anniversaire": ["Birthday", "عيد ميلاد"], "Papier à renouveler": ["Document to renew", "وثيقة للتجديد"], "Facture mensuelle": ["Monthly bill", "فاتورة شهرية"], "Rendez-vous": ["Appointment", "موعد"], "Autre": ["Other", "أخرى"], "Expiré": ["Expired", "منتهية"], "Passé": ["Past", "فات"], "Ajoute tes dates importantes, je m'en souviens pour toi.": ["Add your important dates, I'll remember them for you.", "أضيفي تواريخك المهمة، وسأتذكّرها عنك."], "{n} bientôt": ["{n} soon", "{n} قريبًا"], "{n} date": ["{n} date", "{n} تاريخ"], "{n} dates": ["{n} dates", "{n} تواريخ"], "Choisis une date": ["Choose a date", "اختاري تاريخًا"], "{x} a expiré": ["{x} has expired", "{x} منتهية الصلاحية"], "à renouveler": ["to renew", "للتجديد"], "Règles prévues": ["Period expected", "الدورة متوقعة"], "Pense à sauvegarder tes données": ["Remember to back up your data", "تذكّري حفظ نسخة من بياناتك"], "À venir": ["Coming up", "قريبًا"], "{n} enfant": ["{n} child", "{n} طفل"], "{n} enfants": ["{n} children", "{n} أطفال"], "État de mes données": ["My data status", "حالة بياناتي"], "Sauvegarde automatique active ✓": ["Auto-save is on ✓", "الحفظ التلقائي مفعّل ✓"], "Sauvegarde automatique indisponible": ["Auto-save unavailable", "الحفظ التلقائي غير متاح"], "Tout ce que tu écris est enregistré sur ce téléphone.": ["Everything you write is saved on this phone.", "كل ما تكتبينه محفوظ على هذا الهاتف."], "Cet aperçu ne garde pas les données. Ouvre le fichier dans Chrome.": ["This preview doesn't keep data. Open the file in Chrome.", "هذه المعاينة لا تحفظ البيانات. افتحي الملف في Chrome."], "Dernière copie : {d} · {n} Ko": ["Last copy: {d} · {n} KB", "آخر نسخة: {d} · {n} ك.ب"], "jamais": ["never", "أبدًا"], "Sauvegarde indisponible dans cet aperçu": ["Saving isn't available in this preview", "الحفظ غير متاح في هذه المعاينة"], "✓ Enregistré": ["✓ Saved", "✓ تمّ الحفظ"], "Bravo, une de moins ✨": ["Well done, one less ✨", "أحسنتِ، مهمة أقل ✨"], "✓ Terminé": ["✓ Done", "✓ تمّ"], "Voici ta prochaine étape ✦": ["Here's your next step ✦", "هذه خطوتك التالية ✦"], "Ton esprit est vide. Profite ✿": ["Your mind is clear. Enjoy ✿", "ذهنك صافٍ. استمتعي ✿"], "{n} pensée libérée ☁": ["{n} thought released ☁", "تمّ تفريغ فكرة واحدة ☁"], "{n} pensées libérées ☁": ["{n} thoughts released ☁", "تمّ تفريغ {n} أفكار ☁"], "Écris d'abord ce qui te pèse": ["First write what's weighing on you", "اكتبي أولًا ما يُثقلك"], "Texte copié ✓ Colle-le dans WhatsApp": ["Text copied ✓ Paste it into WhatsApp", "تمّ نسخ النص ✓ الصقيه في واتساب"], "Partage indisponible ici": ["Sharing isn't available here", "المشاركة غير متاحة هنا"], "Cette date est dans le futur": ["This date is in the future", "هذا التاريخ في المستقبل"], "Aucune période en cours": ["No period in progress", "لا توجد دورة جارية"], "Ajoute d'abord les jours à rattraper": ["First add the days to make up", "أضيفي أولًا أيام القضاء"], "Sauvegarde téléchargée ✓": ["Backup downloaded ✓", "تمّ تنزيل النسخة ✓"], "Téléchargement impossible ici : utilise « Copier »": ["Download not possible here: use “Copy”", "التنزيل غير ممكن هنا: استعملي «نسخ»"], "Code copié ✓ Garde-le dans tes notes": ["Code copied ✓ Keep it in your notes", "تمّ نسخ الرمز ✓ احتفظي به في ملاحظاتك"], "Trop volumineux : utilise le téléchargement": ["Too large: use the download", "الحجم كبير جدًا: استعملي التنزيل"], "Choisis un fichier ou colle ton code": ["Choose a file or paste your code", "اختاري ملفًا أو الصقي الرمز"], "Code de sauvegarde invalide": ["Invalid backup code", "رمز النسخة غير صالح"], "Ce n'est pas une sauvegarde Esprit Léger": ["This isn't an Esprit Léger backup", "هذه ليست نسخة احتياطية من راحة البال"], "Données restaurées ✿": ["Data restored ✿", "تمّت استعادة البيانات ✿"], "Qu'Allah te facilite ✿": ["May Allah make it easy for you ✿", "يسّر الله أمرك ✿"], "{n} pensée envoyée ☁": ["{n} thought sent ☁", "تمّ إرسال فكرة واحدة ☁"], "{n} pensées envoyées ☁": ["{n} thoughts sent ☁", "تمّ إرسال {n} أفكار ☁"], "Rien à envoyer pour le moment": ["Nothing to send for now", "لا شيء للإرسال حاليًا"], "{n} tâche(s) effacée(s) ✿": ["{n} task(s) cleared ✿", "تمّ مسح {n} مهمة ✿"], "Fichier chargé : touche « Restaurer »": ["File loaded: tap “Restore”", "تمّ تحميل الملف: اضغطي «استعادة»"], "Lecture impossible : colle le code": ["Can't read it: paste the code", "تعذّرت القراءة: الصقي الرمز"], "Ce soir · {d}": ["Tonight · {d}", "هذا المساء · {d}"], "Semaine du {d}": ["Week of {d}", "أسبوع {d}"]};
+  var LANG='fr', LI={en:0,ar:1};
+  window.__i18nMiss=[];
+  function t(s,v){
+    var r=s;
+    if(LANG!=='fr'){ if(D.hasOwnProperty(s)) r=D[s][LI[LANG]]; else if(/[A-Za-zÀ-ÿ]/.test(s) && window.__i18nMiss.indexOf(s)<0) window.__i18nMiss.push(s); }
+    if(v) for(var k in v) r=r.split('{'+k+'}').join(v[k]);
+    return r;
+  }
+  function tp(n,one,many,v){ v=v||{}; v.n=n; return t(n>1?many:one,v); }
+  function loc(){ return LANG==='en'?'en-GB':LANG==='ar'?'ar-DZ':'fr-FR'; }
+  function frDate(d,opt){try{return d.toLocaleDateString(loc(),opt);}catch(e){return dkey(d);}}
+  function detectLang(){ var n=((navigator.language||'fr')+'').slice(0,2).toLowerCase(); return n==='ar'?'ar':n==='en'?'en':'fr'; }
+
+  var STATIC=[], PHS=[], THS=[];
+  function collectStatic(){
+    var w=document.createTreeWalker(document.body,4,null,false), n;
+    while((n=w.nextNode())){
+      var p=n.parentNode; if(!p||!p.closest) continue;
+      if(p.closest('script,style,#splash,[data-th],textarea')) continue;
+      var k=n.nodeValue.trim(); if(k && D.hasOwnProperty(k)) STATIC.push([n,n.nodeValue,k]);
+    }
+    $$('[placeholder]').forEach(function(el){ var k=el.getAttribute('placeholder'); if(D.hasOwnProperty(k)) PHS.push([el,k]); });
+    $$('[data-th]').forEach(function(el){ var k=el.innerHTML.trim(); THS.push([el,k]); if(!D.hasOwnProperty(k)) window.__i18nMiss.push('TH:'+k); });
+  }
+  function applyStatic(){
+    STATIC.forEach(function(a){ a[0].nodeValue=a[1].replace(a[2],t(a[2])); });
+    PHS.forEach(function(a){ a[0].setAttribute('placeholder',t(a[1])); });
+    THS.forEach(function(a){ a[0].innerHTML=t(a[1]); });
+  }
+  function setLang(l){
+    LANG=(l==='en'||l==='ar')?l:'fr'; S.lang=LANG;
+    var h=document.documentElement; h.setAttribute('lang',LANG); h.setAttribute('dir',LANG==='ar'?'rtl':'ltr');
+    document.title=t('Esprit Léger · Mental Load Planner');
+    applyStatic();
+    $$('button[data-act="lang"]').forEach(function(b){ b.className = b.getAttribute('data-l')===LANG ? 'on' : ''; });
+    $('#sugAct').textContent=t('Laisse-toi guider'); $('#sugDesc').textContent=t('Une activité douce, choisie pour toi.');
+    var cb=$('#cleanBtn'); if(cb){ cb.textContent=t('Effacer les tâches terminées'); }
+  }
+
+  /* ---------- Données & sauvegarde ---------- */
+  var S = null;
+  try{ S = JSON.parse(localStorage.getItem(KEY) || 'null'); }catch(e){ S = null; }
+  function norm(){
+    if(!S || typeof S !== 'object') S = {};
+    S.tasks = S.tasks || []; S.evening = S.evening || {}; S.reset = S.reset || {};
+    S.habits = S.habits || {}; S.name = S.name || ''; S.draft = S.draft || '';
+    S.relax = S.relax || {}; S.dhikr = S.dhikr || {}; S.dkSel = S.dkSel || 0;
+    S.kids = S.kids || []; S.kidEv = S.kidEv || []; S.kidSel = S.kidSel || '';
+    S.cycle = S.cycle || {}; S.cycle.periods = S.cycle.periods || []; S.energy = S.energy || {};
+    S.qada = S.qada || {owed:0,done:0}; S.dates = S.dates || []; S.lastExport = S.lastExport || 0;
+    for(var ek in S.evening){ var eo=S.evening[ek]; if(eo && eo.text){ eo.text.split(/\n+/).forEach(function(l){ l=l.trim(); if(l) S.tasks.push({id:uid(),t:l,cat:'dump',done:false,c:Date.now()}); }); eo.text=''; } }
+  }
+  norm();
+
+  var saveT, warned = false;
+  function writeNow(){
+    try{ localStorage.setItem(KEY, JSON.stringify(S)); return true; }
+    catch(e){ if(!warned){ warned = true; toast(t('Sauvegarde indisponible dans cet aperçu')); } return false; }
+  }
+  function save(quiet){
+    clearTimeout(saveT);
+    saveT = setTimeout(function(){ if(writeNow() && !quiet) toast(t('✓ Enregistré')); }, 400);
+  }
+  document.addEventListener('visibilitychange', function(){ if(document.hidden) writeNow(); });
+  window.addEventListener('pagehide', writeNow);
+
+  var toastT;
+  function toast(m){ var tt=$('#toast'), sh=document.getElementById('shareSheet'), op=sh&&sh.className.indexOf('show')>-1; tt.style.bottom=op?'auto':''; tt.style.top=op?'24px':''; tt.textContent=m; tt.className='toast show'; clearTimeout(toastT); toastT=setTimeout(function(){tt.className='toast';},1600); }
+
+  /* ---------- Constantes ---------- */
+  var DAYS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche','Flexible'];
+  var HABITS = ['💧 Boire de l\'eau','☕ Une vraie pause','🌿 Respirer 5 min','🚶‍♀️ Bouger','💗 Temps pour moi','🌙 Dormir tôt','📿 Istighfar','📖 Coran'];
+  var MOODS = [['☁','Épuisée'],['◌','Fatiguée'],['○','Neutre'],['❀','Apaisée'],['✦','Sereine']];
+  var STEPS = ['Vider complètement ma tête','Relire ce qui reste à faire','Supprimer ce qui n\'est plus important','Choisir 3 priorités pour la semaine','Déléguer au moins une chose','Planifier les repas & les courses','Bloquer un moment rien que pour moi','Célébrer une victoire de la semaine'];
+  var MOVES = [['now','⚡ Maintenant'],['deleg','⇄ Déléguer'],['week','◷ Semaine'],['remind','❦ Ne pas oublier']];
+  var QUOTES = ['Tu n\'as pas à tout porter seule.','Ce qui est écrit n\'a plus besoin d\'être retenu.','Une chose à la fois, c\'est déjà beaucoup.','Le repos fait aussi partie du plan.','Fait vaut mieux que parfait.','Ton calme est une priorité, pas une récompense.','Lâcher prise, c\'est aussi avancer.'];
+
+  /* ---------- Sérénité : activités (sans musique) ---------- */
+  var ACT_CATS = [
+    {k:'sp', n:'Spirituel', items:[
+      ['📿','Istighfar · <span class="ar">أستغفر الله</span>','100 fois, lentement, avec le cœur'],
+      ['📖','Lire le Coran · <span class="ar">قراءة القرآن</span>','Une page, une sourate ou quelques versets'],
+      ['🌅','Adhkar du matin · <span class="ar">أذكار الصباح</span>','Pour commencer la journée protégée'],
+      ['🌇','Adhkar du soir · <span class="ar">أذكار المساء</span>','Pour poser la journée entre Ses mains'],
+      ['🤲','Faire des douas · <span class="ar">الدعاء</span>','Confier à Allah ce qui me pèse'],
+      ['✨','Tasbih · <span class="ar">سبحان الله، الحمد لله، الله أكبر</span>','33 fois chacun après la prière'],
+      ['💚','Salawat · <span class="ar">الصلاة على النبي</span>','Envoyer la prière sur le Prophète (paix et bénédictions sur lui)'],
+      ['🕌','Prier à l\'heure avec khushu\'','Vivre la prière comme une pause de l\'âme'],
+      ['🌙','Sourate Al-Mulk · <span class="ar">سورة الملك</span>','Avant de dormir'],
+      ['💭','Tadabbur · <span class="ar">التدبر</span>','Méditer un seul verset et noter ce qu\'il m\'inspire'],
+      ['🕊️','Écouter une récitation du Coran','Se laisser apaiser par la parole d\'Allah'],
+      ['🌿','Prière de la nuit · <span class="ar">قيام الليل</span>','Deux rakaat dans le calme de la nuit']
+    ]},
+    {k:'corps', n:'Corps', items:[
+      ['🌬️','Respiration 4-7-8','Inspirer 4 s, retenir 7 s, expirer 8 s · 4 cycles'],
+      ['🚶‍♀️','Marcher 15 minutes','Dehors, sans téléphone si possible'],
+      ['🧘‍♀️','Étirements doux','5 minutes pour relâcher nuque et épaules'],
+      ['🛁','Douche ou bain chaud','Laisser l\'eau emporter les tensions'],
+      ['🍵','Une tisane en silence','Camomille, verveine ou menthe, assise, sans rien faire d\'autre'],
+      ['💧','Faire ses ablutions (wudu)','Rafraîchir le corps et apaiser la colère'],
+      ['😴','Une sieste courte (qaylula)','15 à 20 minutes, une sunna qui repose']
+    ]},
+    {k:'esprit', n:'Esprit', items:[
+      ['✍️','Écrire 3 gratitudes','<span class="ar">الحمد لله</span> pour trois choses précises'],
+      ['📓','Journal libre 5 minutes','Écrire sans s\'arrêter, sans se relire'],
+      ['📵','Déconnexion 30 minutes','Téléphone dans une autre pièce'],
+      ['📚','Lire un livre bienfaisant','Quelques pages d\'un livre qui nourrit l\'âme'],
+      ['🎨','Coloriage ou dessin','Occuper les mains, reposer la tête'],
+      ['🧺','Ranger un petit coin','Un tiroir, une étagère : petit ordre, grand calme'],
+      ['🪴','S\'occuper des plantes','Arroser, observer, prendre son temps']
+    ]},
+    {k:'lien', n:'Lien & nature', items:[
+      ['☀️','Prendre l\'air et la lumière','10 minutes à la fenêtre ou au balcon'],
+      ['☎️','Appeler une personne chère','Parent, sœur, amie · silat ar-rahim'],
+      ['🫶','Un geste de bonté','Une sadaqa, un mot gentil, un service rendu'],
+      ['🌳','Contempler la nature','Le ciel, les arbres · méditer la création d\'Allah'],
+      ['🤍','Câlin ou moment avec les enfants','Être présente, sans écran']
+    ]}
+  ];
+  var DHIKR = [
+    ['أستغفر الله',100],['سبحان الله',33],['الحمد لله',33],['الله أكبر',33],
+    ['لا إله إلا الله',100],['اللهم صل على محمد',100],['لا حول ولا قوة إلا بالله',33]
+  ];
+  var actTab='sp';
+  function actId(c,i){return c+'-'+i;}
+
+  /* ---------- Tâches ---------- */
+  function find(id){ for(var i=0;i<S.tasks.length;i++) if(S.tasks[i].id===id) return S.tasks[i]; return null; }
+  function list(cat){ return S.tasks.filter(function(x){return x.cat===cat;}); }
+  function open(cat){ return list(cat).filter(function(x){return !x.done;}); }
+  function sorted(cat){ var a=list(cat); return a.filter(function(x){return !x.done;}).concat(a.filter(function(x){return x.done;})); }
+  function addTask(cat,text,extra){
+    text=(text||'').trim(); if(!text) return false;
+    var o={id:uid(),t:text,cat:cat,done:false,c:Date.now()};
+    if(extra) for(var k in extra) o[k]=extra[k];
+    S.tasks.push(o); return true;
+  }
+
+  function itemHTML(x,opts){
+    opts=opts||{};
+    var h='<li class="item'+(x.done?' done':'')+(x.cat==='remind'?' pin':'')+'">';
+    h+='<button class="chk" data-act="toggle" data-id="'+x.id+'" aria-label="✓"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>';
+    h+='<div class="it-body"><div class="it-t">'+esc(x.t)+'</div>';
+    if(opts.who){ h+='<input class="field who" data-who="'+x.id+'" value="'+esc(x.who||'')+'" placeholder="'+esc(t('À qui ?'))+'">';
+      if(!x.done) h+='<div class="moves"><button class="mv wa" data-act="shareOne" data-id="'+x.id+'">'+WA_ICO+t('Copier la demande')+'</button></div>'; }
+    else if(x.who) h+='<div class="it-meta">→ '+esc(x.who)+'</div>';
+    if(opts.move && !x.done){
+      h+='<div class="moves">';
+      MOVES.forEach(function(m){ h+='<button class="mv" data-act="move" data-to="'+m[0]+'" data-id="'+x.id+'">'+t(m[1])+'</button>'; });
+      h+='</div>';
+    }
+    h+='</div><button class="del" data-act="del" data-id="'+x.id+'" aria-label="×">×</button></li>';
+    return h;
+  }
+  function emptyHTML(msg){ return '<li class="empty"><span>✿</span>'+msg+'</li>'; }
+
+  function renderLists(){
+    var d=sorted('dump');
+    $('#l-dump').innerHTML = d.length ? d.map(function(x){return itemHTML(x,{move:true});}).join('') : emptyHTML(t('Ta tête est légère pour le moment.'));
+    var n=sorted('now');
+    $('#l-now').innerHTML = n.length ? n.map(function(x){return itemHTML(x);}).join('') : emptyHTML(t('Aucune priorité. Respire.'));
+    var g=sorted('deleg');
+    $('#l-deleg').innerHTML = g.length ? g.map(function(x){return itemHTML(x,{who:true});}).join('') : emptyHTML(t('Rien à déléguer… pour l\'instant.'));
+    var r=sorted('remind');
+    $('#l-remind').innerHTML = r.length ? r.map(function(x){return itemHTML(x);}).join('') : emptyHTML(t('Rien d\'important à retenir. Parfait.'));
+
+    var w=list('week'), wh='';
+    DAYS.forEach(function(day){
+      var items=w.filter(function(x){return (x.day||'Flexible')===day;});
+      if(!items.length) return;
+      var left=items.filter(function(x){return !x.done;}).length;
+      items=items.filter(function(x){return !x.done;}).concat(items.filter(function(x){return x.done;}));
+      wh+='<div class="day-h">'+t(day)+'<small>'+tp(left,'{n} restante','{n} restantes')+'</small></div><ul class="list" style="margin-top:4px">'+items.map(function(x){return itemHTML(x);}).join('')+'</ul>';
+    });
+    $('#l-week').innerHTML = wh || '<ul class="list">'+emptyHTML(t('Ta semaine est encore toute douce.'))+'</ul>';
+
+    var f=open('now')[0], fh;
+    if(f){
+      fh='<p class="eyebrow">'+t('Ta seule priorité, là, tout de suite')+'</p><h3>'+esc(f.t)+'</h3><p style="opacity:.75;font-size:13.5px;position:relative">'+t('Le reste peut attendre.')+'</p>'+
+         '<div class="row"><button class="btn rose" data-act="toggle" data-id="'+f.id+'">'+t('C\'est fait ✓')+'</button><button class="btn ghost" data-act="later" data-id="'+f.id+'">'+t('Plus tard')+'</button></div>';
+    } else {
+      fh='<p class="eyebrow">'+t('Rien d\'urgent')+'</p><h3>'+t('Choisis une seule chose.')+'</h3><p style="opacity:.75;font-size:13.5px;position:relative">'+t('Je peux t\'en proposer une parmi tes pensées à trier.')+'</p>'+
+         '<div class="row"><button class="btn rose" data-act="suggest">'+t('Me proposer une tâche')+'</button></div>';
+    }
+    $('#focus').innerHTML=fh;
+    $('#homePrio').innerHTML = f ?
+      '<h3>'+esc(f.t)+'</h3><div class="row"><button class="btn rose" data-act="toggle" data-id="'+f.id+'">'+t('C\'est fait ✓')+'</button><button class="btn ghost" data-act="go" data-go="now">'+t('Tout voir')+'</button></div>' :
+      '<h3>'+t('Rien de prévu pour l\'instant.')+'</h3><div class="row"><button class="btn rose" data-act="go" data-go="dump">'+t('Vider ma tête')+'</button></div>';
+    if(document.getElementById('dtList')) renderDates();
+
+    ['dump','now','deleg','week','remind'].forEach(function(c){
+      var k=open(c).length; var el=$('#c-'+c); if(el) el.textContent = k ? t('{n} en cours',{n:k}) : '';
+    });
+    $('#p-dump').textContent=open('dump').length;
+    $('#p-now').textContent=open('now').length+'/3';
+    $('#b-dump').textContent=open('dump').length||'';
+    $('#b-now').textContent=open('now').length||'';
+
+    var total=S.tasks.filter(function(x){return !x.done;}).length;
+    var lvl,note;
+    if(total===0){lvl='Légère';note=t('Ton esprit est clair. Profite de cet espace.');}
+    else if(total<6){lvl='Légère';note=tp(total,'{n} chose en tête. Tout va bien.','{n} choses en tête. Tout va bien.');}
+    else if(total<12){lvl='Modérée';note=t('{n} choses en tête. Pense à trier et déléguer.',{n:total});}
+    else if(total<20){lvl='Chargée';note=t('{n} choses en tête. Choisis 3 priorités, laisse le reste.',{n:total});}
+    else {lvl='Saturée';note=t('{n} choses en tête. Respire, délègue, et fais ton bilan de la semaine.',{n:total});}
+    var enT=S.energy[dkey()]; if(enT && enT<=2) note+=' '+t('Énergie basse aujourd\'hui : une seule priorité suffit.');
+    $('#mLevel').textContent=t(lvl); $('#mNote').textContent=note;
+    $('#mFill').style.width=Math.max(5,Math.min(100,total*4.5))+'%';
+  }
+
+  function renderHabits(){
+    var d=dkey(), on=S.habits[d]||[];
+    $('#habits').innerHTML=HABITS.map(function(h,i){ return '<button class="chip'+(on.indexOf(i)>-1?' on':'')+'" data-act="habit" data-i="'+i+'">'+t(h)+'</button>'; }).join('');
+    $('#habCount').textContent=on.length+'/'+HABITS.length;
+  }
+
+  function ev(){ var d=dkey(); if(!S.evening[d]) S.evening[d]={mood:'',text:'',w0:'',w1:'',w2:'',tomorrow:''}; return S.evening[d]; }
+  function renderEvening(fill){
+    var e=S.evening[dkey()]||{};
+    $('#moods').innerHTML=MOODS.map(function(m){ return '<button class="mood'+(e.mood===m[1]?' on':'')+'" data-act="mood" data-m="'+m[1]+'"><b>'+m[0]+'</b>'+t(m[1])+'</button>'; }).join('');
+    if(fill) $$('[data-ev]').forEach(function(el){ el.value=e[el.getAttribute('data-ev')]||''; });
+    var keys=Object.keys(S.evening).filter(function(k){return k!==dkey();}).sort().reverse().slice(0,10);
+    $('#hist').innerHTML = keys.length ? keys.map(function(k){
+      var x=S.evening[k], p=k.split('-'), dt=new Date(+p[0],+p[1]-1,+p[2]);
+      var wins=[x.w0,x.w1,x.w2].filter(Boolean);
+      return '<div class="hist"><b>'+esc(frDate(dt,{weekday:'long',day:'numeric',month:'long'}))+'</b>'+(x.mood?' · '+esc(t(x.mood)):'')+
+        (wins.length?'<div>✿ '+wins.map(esc).join(' · ')+'</div>':'')+(x.tomorrow?'<div style="color:var(--muted)">→ '+esc(x.tomorrow)+'</div>':'')+'</div>';
+    }).join('') : '<p class="hint">'+t('Tes soirées apparaîtront ici.')+'</p>';
+    $('#c-soir').textContent = S.evening[dkey()] && (S.evening[dkey()].mood||S.evening[dkey()].text) ? t('Rempli ce soir ✓') : '';
+  }
+
+  function rs(){ var w=wkey(); if(!S.reset[w]) S.reset[w]={c:[],lourd:'',lache:'',intention:''}; return S.reset[w]; }
+  function renderReset(fill){
+    var r=S.reset[wkey()]||{c:[]}, c=r.c||[];
+    $('#steps').innerHTML=STEPS.map(function(s,i){ return '<button class="step'+(c.indexOf(i)>-1?' on':'')+'" data-act="rstep" data-i="'+i+'"><span class="chk"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>'+t(s)+'</span></button>'; }).join('');
+    var pct=Math.round(c.length/STEPS.length*100);
+    $('#ring').style.background='conic-gradient(var(--rose-deep) '+(pct*3.6)+'deg, var(--bg2) 0deg)';
+    $('#ringTxt').textContent=pct+'%';
+    $('#ringNote').textContent = pct===100 ? t('Bilan terminé. Tu peux être fière de toi ✿') : t('Prends 20 minutes rien que pour toi.');
+    $('#c-reset').textContent = pct ? t('{n}% fait',{n:pct}) : '';
+    if(fill) $$('[data-rs]').forEach(function(el){ el.value=r[el.getAttribute('data-rs')]||''; });
+  }
+
+  function renderCalme(){
+    var d=dkey(), done=S.relax[d]||[];
+    $('#actTabs').innerHTML=ACT_CATS.map(function(c){ return '<button class="tab'+(c.k===actTab?' on':'')+'" data-act="actTab" data-k="'+c.k+'">'+t(c.n)+'</button>'; }).join('');
+    var cat=ACT_CATS.filter(function(c){return c.k===actTab;})[0];
+    $('#actTitle').textContent=t(cat.n);
+    var n=0;
+    $('#actList').innerHTML=cat.items.map(function(a,i){
+      var id=actId(cat.k,i), on=done.indexOf(id)>-1; if(on) n++;
+      return '<button class="act'+(cat.k==='sp'?' sp':'')+(on?' on':'')+'" data-act="actDo" data-id="'+id+'"><span class="act-ico">'+a[0]+'</span><span><div class="act-t">'+t(a[1])+'</div><div class="act-d">'+t(a[2])+'</div></span><span class="chk"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></button>';
+    }).join('');
+    $('#actCount').textContent=n+'/'+cat.items.length;
+    var cc0=document.getElementById('c-calme'); if(cc0) cc0.textContent = done.length ? tp(done.length,'{n} faite aujourd\'hui','{n} faites aujourd\'hui') : '';
+    var sel=S.dkSel%DHIKR.length, cnts=S.dhikr[d]||{}, c=cnts[sel]||0, dk=DHIKR[sel];
+    $('#dkSel').innerHTML=DHIKR.map(function(x,i){ return '<button class="dk ar'+(i===sel?' on':'')+'" data-act="dkSel" data-i="'+i+'">'+x[0]+'</button>'; }).join('');
+    $('#dkName').textContent=dk[0];
+    $('#dkCount').textContent=c;
+    $('#dkGoal').textContent = c>=dk[1] ? t('Objectif atteint ✓') : '/ '+dk[1];
+  }
+
+  /* ---------- Utilitaires dates ---------- */
+  function pd(k){ var p=String(k).split('-'); return new Date(+p[0],+p[1]-1,+p[2],12); }
+  function diffDays(a,b){ return Math.round((pd(b)-pd(a))/864e5); }
+  function addDays(k,n){ var d=pd(k); d.setDate(d.getDate()+n); return dkey(d); }
+  function fmtD(k){ var d=pd(k), o={day:'numeric',month:'short'}; if(d.getFullYear()!==new Date().getFullYear()) o.year='numeric'; return frDate(d,o); }
+  function inTxt(n){ return n===0?t('aujourd\'hui'):n===1?t('demain'):n>1?t('dans {n} j',{n:n}):t('il y a {n} j',{n:-n}); }
+  function byId(arr,id){ for(var i=0;i<arr.length;i++) if(arr[i].id===id) return arr[i]; return null; }
+
+  /* ---------- Partage WhatsApp ---------- */
+  var WA_ICO='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 012-2h9"/></svg>';
+  var SIGN='\n\n— via Esprit Léger ✿';
+  function fallbackCopy(s){ try{ var ta=document.createElement('textarea'); ta.value=s; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.top='0'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); }catch(e){} }
+  function copyText(s){ try{ if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(s).then(null,function(){ fallbackCopy(s); }); return; } }catch(e){} fallbackCopy(s); }
+  var shareTxt='';
+  function copyFrom(el,text){
+    var ok=false;
+    try{ el.focus(); el.select(); el.setSelectionRange(0,el.value.length); ok=document.execCommand('copy'); }catch(e){}
+    try{ el.blur(); if(window.getSelection) window.getSelection().removeAllRanges(); }catch(e){}
+    if(!ok){ try{ if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(null,function(){}); }catch(e){} }
+    return ok;
+  }
+  function waShare(text){
+    shareTxt=text; writeNow();
+    var ta=$('#shPrev'); ta.value=text;
+    $('#shareSheet').className='sheet-bg show';
+    copyFrom(ta,text); toast(t('Texte copié ✓'));
+  }
+  function closeSheet(){ $('#shareSheet').className='sheet-bg'; }
+  document.addEventListener('click',function(e){ if(e.target && e.target.id==='shareSheet') closeSheet(); });
+  function shareList(cat){
+    var items=open(cat), txt;
+    if(!items.length){ toast(t('La liste est vide')); return; }
+    if(cat==='deleg') txt=t('🤍 Petit coup de main ?')+'\n\n'+items.map(function(x){return '• '+x.t+(x.who?' → '+x.who:'');}).join('\n')+'\n\n'+t('Merci beaucoup !');
+    else if(cat==='week'){ txt=t('🗓 Cette semaine')+'\n'; DAYS.forEach(function(d){ var it=items.filter(function(x){return (x.day||'Flexible')===d;}); if(it.length) txt+='\n'+t(d)+'\n'+it.map(function(x){return '• '+x.t;}).join('\n')+'\n'; }); }
+    else if(cat==='remind') txt=t('📌 À ne pas oublier')+'\n\n'+items.map(function(x){return '• '+x.t;}).join('\n');
+    else txt=t('✦ Mes priorités')+'\n\n'+items.map(function(x){return '• '+x.t;}).join('\n');
+    waShare(txt+SIGN);
+  }
+
+  /* ---------- Confirmation à deux touches ---------- */
+  var armT={};
+  function confirmTap(b,key,fn){
+    if(armT[key]){ clearTimeout(armT[key].t); b.textContent=armT[key].o; armT[key]=null; fn(); return; }
+    var o=b.textContent; b.textContent=t('Toucher encore pour confirmer');
+    armT[key]={o:o,t:setTimeout(function(){ b.textContent=o; armT[key]=null; },3500)};
+  }
+
+  /* ---------- Famille & enfants ---------- */
+  var KID_F=[['name','Prénom','text'],['birth','Date de naissance','date'],['ecole','École & classe','text'],['medecin','Médecin / pédiatre (nom, téléphone)','text'],['sang','Groupe sanguin','text'],['allergies','Allergies & santé','text'],['vet','Taille vêtements','text'],['pointure','Pointure','text'],['notes','Notes (goûts, amis, peurs…)','area']];
+  var KID_EV={medecin:'🩺 Médecin',vaccin:'💉 Vaccin',ecole:'🎒 École',activite:'⚽ Activité',autre:'📌 Autre'};
+  var kidAdding=false;
+  function kidAge(b){
+    if(!b) return ''; var d=pd(b), n=new Date(), mo=(n.getFullYear()-d.getFullYear())*12+n.getMonth()-d.getMonth();
+    if(n.getDate()<d.getDate()) mo--; if(mo<0) return '';
+    return mo>=12 ? tp(Math.floor(mo/12),'{n} an','{n} ans') : t('{n} mois',{n:mo});
+  }
+  function curKid(){ var k=byId(S.kids,S.kidSel); if(!k && S.kids.length){ k=S.kids[0]; S.kidSel=k.id; } return k; }
+  function renderKidTabs(){
+    $('#kidTabs').innerHTML = S.kids.map(function(k){ return '<button class="tab'+(k.id===S.kidSel&&!kidAdding?' on':'')+'" data-act="kidSel" data-id="'+k.id+'">'+esc(k.name||t('Enfant'))+(k.birth&&kidAge(k.birth)?' · '+kidAge(k.birth):'')+'</button>'; }).join('')+'<button class="tab'+(kidAdding||!S.kids.length?' on':'')+'" data-act="kidNew">'+t('+ Ajouter')+'</button>';
+  }
+  function renderKids(){
+    var k=curKid(); renderKidTabs();
+    if(!k || kidAdding){
+      $('#kidBody').innerHTML='<div class="card"><h2 class="q-lbl">'+(S.kids.length?t('Ajouter un enfant'):t('Ajoute ton premier enfant'))+'</h2><div class="add"><input class="field" id="kidName" data-enter="kid" placeholder="'+esc(t('Prénom'))+'"><button class="btn primary" data-act="kidAdd">'+t('Ajouter')+'</button></div><p class="hint">'+t('Une fiche par enfant : santé, école, tailles, rendez-vous.')+'</p></div>';
+      return;
+    }
+    var h='<div class="card"><div class="c-head"><h2>'+t('Fiche de {x}',{x:esc(k.name||'')})+'</h2></div>';
+    KID_F.forEach(function(f,i){
+      h+='<label class="lbl"'+(i?' style="margin-top:12px"':'')+'>'+t(f[1])+'</label>';
+      if(f[2]==='area') h+='<textarea class="field sm" data-kf="'+f[0]+'">'+esc(k[f[0]]||'')+'</textarea>';
+      else h+='<input class="field" type="'+f[2]+'" data-kf="'+f[0]+'" value="'+esc(k[f[0]]||'')+'">';
+    });
+    h+='<button class="btn ghost block wa-btn" data-act="shareKid">'+WA_ICO+t('Copier la fiche')+'</button></div>';
+    h+='<div class="card"><div class="c-head"><h2>'+t('Agenda')+'</h2><span class="pill" id="kidEvCount">0</span></div>'+
+      '<input class="field" id="kevT" data-enter="kev" placeholder="'+esc(t('Ex. Rappel vaccin, réunion parents…'))+'">'+
+      '<div class="add" style="margin-top:8px"><select class="field" id="kevType">'+Object.keys(KID_EV).map(function(x){return '<option value="'+x+'">'+t(KID_EV[x])+'</option>';}).join('')+'</select><input class="field" type="date" id="kevD"></div>'+
+      '<button class="btn primary block" data-act="kevAdd">'+t('Ajouter à l\'agenda')+'</button><ul class="list" id="kidEv"></ul></div>';
+    h+='<button class="btn ghost block" data-act="kidDel" style="margin:0 0 14px">'+t('Supprimer cette fiche')+'</button>';
+    $('#kidBody').innerHTML=h;
+    renderKidEv();
+  }
+  function renderKidEv(){
+    var el=$('#kidEv'), k=curKid(); if(!el||!k) return; var td=dkey();
+    var a=S.kidEv.filter(function(e){return e.kid===k.id;});
+    a.sort(function(x,y){ if(x.done!==y.done) return x.done?1:-1; return (x.date||'9999').localeCompare(y.date||'9999'); });
+    el.innerHTML = a.length ? a.map(function(e){
+      var d=e.date?diffDays(td,e.date):0;
+      return '<li class="item'+(e.done?' done':'')+'"><button class="chk" data-act="kevToggle" data-id="'+e.id+'" aria-label="✓"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button><div class="it-body"><div class="it-t">'+esc(e.t)+'</div><div class="it-meta" style="color:var(--muted)">'+(KID_EV[e.type]?t(KID_EV[e.type]):'')+(e.date?' · '+fmtD(e.date):'')+'</div></div>'+(e.date&&!e.done?'<span class="due'+(d<0?' late':d<=7?' soon':'')+'">'+inTxt(d)+'</span>':'')+'<button class="del" data-act="kevDel" data-id="'+e.id+'" aria-label="×">×</button></li>';
+    }).join('') : emptyHTML(t('Aucun rendez-vous prévu.'));
+    $('#kidEvCount').textContent=a.filter(function(e){return !e.done;}).length;
+  }
+  function kidAdd(){ var i=$('#kidName'), n=(i&&i.value||'').trim(); if(!n){ if(i) i.focus(); return; } var k={id:uid(),name:n}; S.kids.push(k); S.kidSel=k.id; kidAdding=false; renderKids(); renderAlerts(); save(); }
+  function kevAdd(){ var k=curKid(), i=$('#kevT'), s=(i.value||'').trim(); if(!k||!s){ i.focus(); return; } S.kidEv.push({id:uid(),kid:k.id,t:s,type:$('#kevType').value,date:$('#kevD').value||'',done:false}); i.value=''; $('#kevD').value=''; renderKidEv(); renderAlerts(); save(); }
+  function shareKid(){
+    var k=curKid(); if(!k) return;
+    var txt=t('👧 Fiche de {x}',{x:(k.name||'')})+'\n';
+    KID_F.forEach(function(f){ if(f[0]==='name'||!k[f[0]]) return; var v=f[0]==='birth'?fmtD(k.birth)+(kidAge(k.birth)?' ('+kidAge(k.birth)+')':''):k[f[0]]; txt+='\n'+t(f[1])+' : '+v; });
+    var up=S.kidEv.filter(function(e){return e.kid===k.id&&!e.done&&e.date&&diffDays(dkey(),e.date)>=0;}).sort(function(a,b){return a.date.localeCompare(b.date);});
+    if(up.length) txt+='\n\n'+t('📅 À venir')+'\n'+up.map(function(e){return '• '+fmtD(e.date)+' : '+e.t;}).join('\n');
+    waShare(txt+SIGN);
+  }
+
+  /* ---------- Cycle & énergie ---------- */
+  var ENERGY=[['🪫','Vide'],['😮‍💨','Basse'],['🙂','Moyenne'],['😊','Bonne'],['⚡','Pleine']];
+  function avg(a){ return Math.round(a.reduce(function(s,x){return s+x;},0)/a.length); }
+  function cycleInfo(){
+    var p=S.cycle.periods.slice().sort(function(a,b){return a.start.localeCompare(b.start);});
+    if(!p.length) return null;
+    var lens=[]; for(var i=1;i<p.length;i++){ var l=diffDays(p[i-1].start,p[i].start); if(l>=20&&l<=45) lens.push(l); }
+    lens=lens.slice(-6);
+    var durs=p.filter(function(x){return x.end;}).map(function(x){return diffDays(x.start,x.end)+1;}).filter(function(x){return x>0&&x<=12;}).slice(-6);
+    var a=lens.length?avg(lens):28, last=p[p.length-1], day=diffDays(last.start,dkey())+1, next=addDays(last.start,a);
+    return {last:last,day:day,avg:a,dur:durs.length?avg(durs):5,next:next,until:diffDays(dkey(),next),list:p};
+  }
+  function phaseOf(ci){
+    var ov=ci.avg-14, onP=ci.last.end ? ci.day<=diffDays(ci.last.start,ci.last.end)+1 : ci.day<=10;
+    if(onP) return [t('Règles'),'🌸',t('Énergie souvent plus basse. Allège ta liste, délègue davantage et repose-toi sans culpabilité.')];
+    if(ci.day<ov-1) return [t('Phase folliculaire'),'🌱',t('L\'énergie remonte : bon moment pour organiser, planifier et lancer ce qui attend.')];
+    if(ci.day<=ov+1) return [t('Période d\'ovulation'),'☀️',t('Souvent un pic d\'énergie : idéal pour les rendez-vous, les appels et les tâches qui demandent de l\'élan.')];
+    if(ci.day<=ci.avg) return [t('Phase lutéale'),'🍂',t('Fatigue et sensibilité possibles : simplifie, prévois des repas faciles et protège ton sommeil.')];
+    return [t('Retard de {n} j',{n:ci.day-ci.avg}),'⏳',t('Les cycles varient. Si le retard se prolonge ou t\'inquiète, parles-en à un professionnel de santé.')];
+  }
+  function addPeriod(k){
+    if(S.cycle.periods.some(function(p){return p.start===k;})){ toast(t('Cette date est déjà notée')); return; }
+    var ci=cycleInfo();
+    if(ci && !ci.last.end && k>ci.last.start) ci.last.end=addDays(ci.last.start,Math.min(ci.dur-1,diffDays(ci.last.start,k)-1));
+    S.cycle.periods.push({start:k,end:''}); renderCycle(); renderAlerts(); save();
+  }
+  function renderCycle(){
+    var ci=cycleInfo(), h;
+    if(!ci) h='<p class="eyebrow">'+t('Mon cycle')+'</p><h3>'+t('Commençons ensemble')+'</h3><p style="opacity:.8;font-size:13.5px">'+t('Indique le début de tes dernières règles juste en dessous.')+'</p>';
+    else { var ph=phaseOf(ci);
+      h='<p class="eyebrow">'+t('Jour {n} du cycle',{n:ci.day})+'</p><h3>'+ph[1]+' '+ph[0]+'</h3><p style="opacity:.88;font-size:14px">'+ph[2]+'</p>'+
+        '<p style="margin-top:14px;font-size:13px;color:var(--gold)">'+t('Prochaines règles estimées : {d} ({x})',{d:fmtD(ci.next),x:(ci.until>=0?inTxt(ci.until):t('en retard'))})+'</p>'+
+        '<p style="margin-top:6px;font-size:11.5px;opacity:.6">'+t('Cycle moyen : {n} j · estimation indicative, pas un avis médical',{n:ci.avg})+'</p>';
+    }
+    $('#cyStatus').innerHTML=h;
+    var lst=(ci?ci.list:[]).slice().reverse().slice(0,8);
+    $('#cyHist').innerHTML=lst.map(function(p){ var dd=p.end?diffDays(p.start,p.end)+1:0; return '<li class="item"><span class="act-ico" style="width:34px;height:34px;font-size:15px">🌸</span><div class="it-body"><div class="it-t">'+fmtD(p.start)+(p.end?' → '+fmtD(p.end):(diffDays(p.start,dkey())<10?' · '+t('en cours'):''))+'</div>'+(dd?'<div class="it-meta" style="color:var(--muted)">'+tp(dd,'{n} jour','{n} jours')+'</div>':'')+'</div><button class="del" data-act="cyDel" data-s="'+p.start+'" aria-label="×">×</button></li>'; }).join('');
+    var td=dkey(), e=S.energy[td]||0;
+    $('#energy').innerHTML=ENERGY.map(function(x,i){ return '<button class="mood'+(e===i+1?' on':'')+'" data-act="energy" data-v="'+(i+1)+'"><b>'+x[0]+'</b>'+t(x[1])+'</button>'; }).join('');
+    var bars=''; for(var i=13;i>=0;i--){ var k=addDays(td,-i), v=S.energy[k]||0; bars+='<span style="height:'+(v?v*20:6)+'%'+(v?'':';background:var(--bg2)')+'"></span>'; }
+    $('#enBars').innerHTML=bars;
+    var q=S.qada, tot=q.owed+q.done, pc=tot?Math.round(q.done/tot*100):0;
+    $('#qada').innerHTML='<div class="q-num"><button class="q-b" data-act="qada" data-v="-1" aria-label="−">−</button><div><b>'+q.owed+'</b><small>'+(q.owed>1?t('jours à rattraper'):t('jour à rattraper'))+'</small></div><button class="q-b" data-act="qada" data-v="1" aria-label="+">+</button></div>'+
+      '<div class="m-bar"><span style="width:'+pc+'%"></span></div><p class="m-note">'+tp(q.done,'{n} jour déjà rattrapé','{n} jours déjà rattrapés')+(q.owed===0&&q.done>0?' · <b style="color:var(--rose-deep);font-weight:500">الحمد لله · '+t('tout est rattrapé ✿')+'</b>':'')+'</p>'+
+      '<button class="btn rose block" data-act="qadaDone"'+(q.owed?'':' style="opacity:.5"')+'>'+t('J\'ai jeûné un jour ✓')+'</button>';
+    $('#c-cycle').textContent = ci ? t('Jour {n}',{n:ci.day}) : '';
+  }
+
+  /* ---------- Dates & papiers ---------- */
+  var DT_TYPES={anniv:['🎂','Anniversaire',14,'y'],papier:['🪪','Papier à renouveler',60,''],facture:['🧾','Facture mensuelle',5,'m'],rdv:['📅','Rendez-vous',7,''],autre:['📌','Autre',14,'']};
+  function mkMonth(y,m,day){ var last=new Date(y,m+1,0).getDate(); return new Date(y,m,Math.min(day,last),12); }
+  function nextOcc(x){
+    var now=pd(dkey()), d=pd(x.date), ty=DT_TYPES[x.type]||DT_TYPES.autre, n;
+    if(ty[3]==='y'){ n=mkMonth(now.getFullYear(),d.getMonth(),d.getDate()); if(n<now) n=mkMonth(now.getFullYear()+1,d.getMonth(),d.getDate()); return dkey(n); }
+    if(ty[3]==='m'){ n=mkMonth(now.getFullYear(),now.getMonth(),d.getDate()); if(n<now) n=mkMonth(now.getFullYear(),now.getMonth()+1,d.getDate()); return dkey(n); }
+    return x.date;
+  }
+  function datesSorted(){ var td=dkey(); return S.dates.map(function(x){ var n=nextOcc(x); return {x:x,next:n,days:diffDays(td,n)}; }).sort(function(a,b){return a.days-b.days;}); }
+  function renderDates(){
+    var a=datesSorted();
+    $('#dtList').innerHTML = a.length ? a.map(function(o){
+      var x=o.x, ty=DT_TYPES[x.type]||DT_TYPES.autre, cls=o.days<0?' late':o.days<=ty[2]?' soon':'', extra='';
+      if(x.type==='anniv'){ var age=pd(o.next).getFullYear()-pd(x.date).getFullYear(); if(age>0&&age<130) extra=' · '+tp(age,'{n} an','{n} ans'); }
+      var lbl=o.days<0?(x.type==='papier'?t('Expiré'):t('Passé')):inTxt(o.days);
+      return '<li class="item"><span class="act-ico" style="width:38px;height:38px;font-size:17px">'+ty[0]+'</span><div class="it-body"><div class="it-t">'+esc(x.t)+'</div><div class="it-meta" style="color:var(--muted)">'+t(ty[1])+' · '+fmtD(o.next)+extra+'</div></div><span class="due'+cls+'">'+lbl+'</span><button class="del" data-act="dtDel" data-id="'+x.id+'" aria-label="×">×</button></li>';
+    }).join('') : emptyHTML(t('Ajoute tes dates importantes, je m\'en souviens pour toi.'));
+    var soon=a.filter(function(o){ var ty=DT_TYPES[o.x.type]||DT_TYPES.autre; return o.days>=0&&o.days<=ty[2]; }).length;
+    var tot=S.dates.length+open('remind').length;
+    $('#c-dates').textContent = soon ? t('{n} bientôt',{n:soon}) : (tot ? tp(tot,'{n} élément','{n} éléments') : '');
+  }
+  function dtAdd(){ var i=$('#in-dt'), s=(i.value||'').trim(), d=$('#dtDate').value; if(!s){ i.focus(); return; } if(!d){ toast(t('Choisis une date')); return; } S.dates.push({id:uid(),t:s,date:d,type:$('#dtType').value}); i.value=''; $('#dtDate').value=''; renderDates(); renderAlerts(); save(); }
+
+  /* ---------- Alertes accueil ---------- */
+  function renderAlerts(){
+    var td=dkey(), out=[];
+    datesSorted().forEach(function(o){ var ty=DT_TYPES[o.x.type]||DT_TYPES.autre;
+      if(o.days>=0&&o.days<=ty[2]) out.push([o.days,ty[0],esc(o.x.t),inTxt(o.days),'dates']);
+      else if(o.days<0&&o.x.type==='papier') out.push([-1,'⚠️',t('{x} a expiré',{x:esc(o.x.t)}),t('à renouveler'),'dates']); });
+    S.kidEv.forEach(function(e){ if(e.done||!e.date) return; var d=diffDays(td,e.date); if(d>=0&&d<=7){ var k=byId(S.kids,e.kid); out.push([d,(KID_EV[e.type]||'📌').split(' ')[0],esc(e.t)+(k?' · '+esc(k.name||''):''),inTxt(d),'famille']); } });
+    var ci=cycleInfo(); if(ci&&ci.until>=0&&ci.until<=3) out.push([ci.until,'🌸',t('Règles prévues'),inTxt(ci.until),'cycle']);
+    if(S.tasks.length+S.dates.length+S.kids.length>=5 && (!S.lastExport||Date.now()-S.lastExport>30*864e5)) out.push([99,'💾',t('Pense à sauvegarder tes données'),'','data']);
+    out.sort(function(a,b){return a[0]-b[0];});
+    var el=$('#alerts');
+    if(!out.length){ el.style.display='none'; el.innerHTML=''; }
+    else { el.style.display=''; el.innerHTML='<div class="c-head"><h2>'+t('À venir')+'</h2><span class="pill">'+out.length+'</span></div>'+out.slice(0,6).map(function(a){ return '<button class="alert-row" data-act="go" data-go="'+a[4]+'"><span>'+a[1]+'</span><span class="al-t">'+a[2]+'</span><span class="due soon">'+a[3]+'</span></button>'; }).join(''); }
+    $('#c-famille').textContent = S.kids.length ? tp(S.kids.length,'{n} enfant','{n} enfants') : '';
+    $('#c-data').textContent = S.lastExport ? '✓ '+frDate(new Date(S.lastExport),{day:'numeric',month:'short'}) : '';
+  }
+
+  /* ---------- Sauvegarde ---------- */
+  function renderData(){
+    var ok=true; try{ localStorage.setItem('__el_t','1'); localStorage.removeItem('__el_t'); }catch(e){ ok=false; }
+    var size=JSON.stringify(S).length;
+    $('#dataStatus').innerHTML='<p class="eyebrow">'+t('État de mes données')+'</p><h3>'+(ok?t('Sauvegarde automatique active ✓'):t('Sauvegarde automatique indisponible'))+'</h3><p style="opacity:.85;font-size:13.5px">'+(ok?t('Tout ce que tu écris est enregistré sur ce téléphone.'):t('Cet aperçu ne garde pas les données. Ouvre le fichier dans Chrome.'))+'</p><p style="margin-top:12px;font-size:13px;color:var(--gold)">'+t('Dernière copie : {d} · {n} Ko',{d:(S.lastExport?frDate(new Date(S.lastExport),{day:'numeric',month:'long',year:'numeric'}):t('jamais')),n:Math.max(1,Math.round(size/1024))})+'</p>';
+  }
+  function backupText(){ return JSON.stringify({app:'esprit-leger',v:1,date:dkey(),data:S}); }
+  function markExport(){ S.lastExport=Date.now(); writeNow(); renderData(); renderAlerts(); }
+
+  function renderAll(){ renderLists(); renderHabits(); renderEvening(false); renderReset(false); renderCalme(); renderKids(); renderCycle(); renderDates(); renderAlerts(); renderData(); }
+
+  /* ---------- Navigation ---------- */
+  function go(v){
+    $$('.view').forEach(function(s){ s.className = 'view' + (s.id==='v-'+v ? ' active' : ''); });
+    var PARENT={deleg:'dump',week:'dump',famille:'vie',cycle:'vie',dates:'vie',data:'vie',soir:'calme',reset:'calme'}, pv=PARENT[v]||v;
+    $$('.nb').forEach(function(b){ b.className='nb'+(b.getAttribute('data-go')===pv?' active':''); });
+    if(v==='soir') renderEvening(true);
+    if(v==='reset') renderReset(true);
+    if(v==='famille'){ kidAdding=false; renderKids(); }
+    if(v==='cycle') renderCycle();
+    if(v==='dates') renderDates();
+    if(v==='data') renderData();
+    if(v==='home') renderAlerts();
+    try{ window.scrollTo(0,0); }catch(e){}
+  }
+
+  /* ---------- Actions ---------- */
+  var cleanArmed=false, cleanT;
+  document.addEventListener('click', function(e){
+    var b = e.target.closest ? e.target.closest('[data-act]') : null;
+    if(!b) return;
+    var act=b.getAttribute('data-act'), id=b.getAttribute('data-id'), x=id?find(id):null;
+    switch(act){
+      case 'go': go(b.getAttribute('data-go')); return;
+      case 'lang': setLang(b.getAttribute('data-l')); init(); onbStep(onbI); save(true); return;
+      case 'onbNext': if(onbI<3) onbStep(onbI+1); else onbEnd(); return;
+      case 'onbSkip': onbEnd(); return;
+      case 'onbShow': onbStep(0); $('#onb').style.display='flex'; return;
+      case 'toggle':
+        if(x){ x.done=!x.done; if(x.done){ toast(x.cat==='now'?t('Bravo, une de moins ✨'):t('✓ Terminé')); } renderLists(); save(true); }
+        return;
+      case 'del':
+        if(x){ S.tasks.splice(S.tasks.indexOf(x),1); renderLists(); save(); }
+        return;
+      case 'move':
+        if(x){ var to=b.getAttribute('data-to'); x.cat=to; if(to==='week') x.day='Flexible';
+          var labels={now:'Maintenant',deleg:'Déléguer',week:'Cette semaine',remind:'À ne pas oublier'};
+          renderLists(); save(true); toast('→ '+t(labels[to])); }
+        return;
+      case 'later':
+        if(x){ S.tasks.splice(S.tasks.indexOf(x),1); S.tasks.push(x); renderLists(); save(true); }
+        return;
+      case 'suggest':
+        var d=open('dump')[0] || open('week')[0] || open('remind')[0];
+        if(d){ d.cat='now'; renderLists(); save(true); toast(t('Voici ta prochaine étape ✦')); }
+        else toast(t('Ton esprit est vide. Profite ✿'));
+        return;
+      case 'dump':
+        var ta=$('#dumpIn'), lines=ta.value.split(/\n+/), n=0;
+        lines.forEach(function(l){ if(addTask('dump',l.replace(/^[-•*\d.)\s]+/,''))) n++; });
+        if(n){ ta.value=''; S.draft=''; renderLists(); save(true); toast(tp(n,'{n} pensée libérée ☁','{n} pensées libérées ☁')); }
+        else toast(t('Écris d\'abord ce qui te pèse'));
+        return;
+      case 'add': doAdd(b.getAttribute('data-cat')); return;
+      case 'shareList': shareList(b.getAttribute('data-cat')); return;
+      case 'shClose': closeSheet(); return;
+      case 'shCopy': copyFrom($('#shPrev'),shareTxt); toast(t('Texte copié ✓')); return;
+      case 'shareOne':
+        if(x) waShare(t('Salam 🤍\nPeux-tu t\'occuper de ceci, s\'il te plaît ?')+'\n\n• '+x.t+'\n\n'+t('Merci beaucoup !')); return;
+      case 'kidSel': S.kidSel=id; kidAdding=false; renderKids(); save(true); return;
+      case 'kidNew': kidAdding=true; renderKids(); try{ $('#kidName').focus(); }catch(err){} return;
+      case 'kidAdd': kidAdd(); return;
+      case 'kidDel':
+        confirmTap(b,'kid',function(){ var k=curKid(); if(!k) return; S.kidEv=S.kidEv.filter(function(e){return e.kid!==k.id;}); S.kids=S.kids.filter(function(z){return z.id!==k.id;}); S.kidSel=''; renderKids(); renderAlerts(); save(); }); return;
+      case 'kevAdd': kevAdd(); return;
+      case 'kevToggle': var ke=byId(S.kidEv,id); if(ke){ ke.done=!ke.done; renderKidEv(); renderAlerts(); save(true); } return;
+      case 'kevDel': S.kidEv=S.kidEv.filter(function(e){return e.id!==id;}); renderKidEv(); renderAlerts(); save(); return;
+      case 'shareKid': shareKid(); return;
+      case 'dtAdd': dtAdd(); return;
+      case 'dtDel': S.dates=S.dates.filter(function(z){return z.id!==id;}); renderDates(); renderAlerts(); save(); return;
+      case 'cyStart': addPeriod(dkey()); return;
+      case 'cyStartDate': var cv=$('#cyDate').value; if(!cv){ toast(t('Choisis une date')); return; } if(cv>dkey()){ toast(t('Cette date est dans le futur')); return; } addPeriod(cv); $('#cyDate').value=''; return;
+      case 'cyEnd': var c2=cycleInfo(); if(!c2||c2.last.end){ toast(t('Aucune période en cours')); return; } c2.last.end=dkey(); renderCycle(); renderAlerts(); save(); return;
+      case 'cyDel': var cs=b.getAttribute('data-s'); S.cycle.periods=S.cycle.periods.filter(function(z){return z.start!==cs;}); renderCycle(); renderAlerts(); save(); return;
+      case 'energy': var evv=+b.getAttribute('data-v'), tk2=dkey(); S.energy[tk2]=S.energy[tk2]===evv?0:evv; renderCycle(); renderLists(); save(true); return;
+      case 'qada': S.qada.owed=Math.max(0,S.qada.owed+(+b.getAttribute('data-v'))); renderCycle(); save(true); return;
+      case 'qadaDone': if(S.qada.owed>0){ S.qada.owed--; S.qada.done++; toast('تقبل الله ✿'); renderCycle(); save(true); } else toast(t('Ajoute d\'abord les jours à rattraper')); return;
+      case 'exportFile':
+        try{ var blob=new Blob([backupText()],{type:'application/json'}), u=URL.createObjectURL(blob), la=document.createElement('a');
+          la.href=u; la.download='esprit-leger-backup-'+dkey()+'.json'; document.body.appendChild(la); la.click();
+          setTimeout(function(){ try{ document.body.removeChild(la); URL.revokeObjectURL(u); }catch(err){} },1500);
+          markExport(); toast(t('Sauvegarde téléchargée ✓')); }
+        catch(err){ toast(t('Téléchargement impossible ici : utilise « Copier »')); }
+        return;
+      case 'exportCopy':
+        var bt=backupText(), box=$('#exportBox'); box.value=bt; box.style.display='block'; copyFrom(box,bt); markExport(); toast(t('Code copié ✓ Garde-le dans tes notes')); return;
+      case 'importDo':
+        var raw=($('#importText').value||'').trim(); if(!raw){ toast(t('Choisis un fichier ou colle ton code')); return; }
+        var obj=null; try{ obj=JSON.parse(raw); }catch(err){ toast(t('Code de sauvegarde invalide')); return; }
+        var data=obj&&obj.data?obj.data:obj;
+        if(!data||typeof data!=='object'||!Array.isArray(data.tasks)){ toast(t('Ce n\'est pas une sauvegarde Esprit Léger')); return; }
+        confirmTap(b,'imp',function(){ var keep=LANG; S=data; norm(); setLang(S.lang||keep); writeNow(); $('#importText').value=''; init(); go('home'); toast(t('Données restaurées ✿')); }); return;
+      case 'actTab': actTab=b.getAttribute('data-k'); renderCalme(); return;
+      case 'actDo':
+        var tdd=dkey(), dn=S.relax[tdd]||(S.relax[tdd]=[]), ai=b.getAttribute('data-id'), ap=dn.indexOf(ai);
+        if(ap>-1) dn.splice(ap,1); else { dn.push(ai); toast(t('Qu\'Allah te facilite ✿')); }
+        renderCalme(); save(true); return;
+      case 'randAct':
+        var all=[]; ACT_CATS.forEach(function(c){ c.items.forEach(function(a,i){ all.push([c.k,i,a]); }); });
+        var pick=all[Math.floor(Math.random()*all.length)];
+        $('#sugAct').innerHTML=pick[2][0]+' '+t(pick[2][1]); $('#sugDesc').innerHTML=t(pick[2][2]);
+        actTab=pick[0]; renderCalme(); return;
+      case 'dkSel': S.dkSel=+b.getAttribute('data-i'); renderCalme(); save(true); return;
+      case 'tasbih':
+        var tk=dkey(), sc=S.dkSel%DHIKR.length, cc=S.dhikr[tk]||(S.dhikr[tk]={});
+        cc[sc]=(cc[sc]||0)+1;
+        try{ if(navigator.vibrate) navigator.vibrate(cc[sc]===DHIKR[sc][1]?[80,60,80]:12); }catch(err){}
+        if(cc[sc]===DHIKR[sc][1]) toast('ما شاء الله · '+t('Objectif atteint ✿'));
+        renderCalme(); save(true); return;
+      case 'tasbihReset':
+        var tr=S.dhikr[dkey()]; if(tr){ tr[S.dkSel%DHIKR.length]=0; } renderCalme(); save(true); return;
+      case 'habit':
+        var hd=dkey(), on=S.habits[hd]||(S.habits[hd]=[]), hi=+b.getAttribute('data-i'), p=on.indexOf(hi);
+        if(p>-1) on.splice(p,1); else on.push(hi);
+        renderHabits(); save(true); return;
+      case 'mood':
+        var m=b.getAttribute('data-m'), E=ev(); E.mood = E.mood===m ? '' : m;
+        renderEvening(false); save(); return;
+      case 'evToDump':
+        var E2=ev(), k=0;
+        (E2.text||'').split(/\n+/).forEach(function(l){ if(addTask('dump',l)) k++; });
+        if(k){ E2.text=''; $('[data-ev="text"]').value=''; renderLists(); save(true); toast(tp(k,'{n} pensée envoyée ☁','{n} pensées envoyées ☁')); }
+        else toast(t('Rien à envoyer pour le moment'));
+        return;
+      case 'rstep':
+        var R=rs(), j=+b.getAttribute('data-i'), q=R.c.indexOf(j);
+        if(q>-1) R.c.splice(q,1); else R.c.push(j);
+        renderReset(false); save(true); return;
+      case 'clean':
+        if(!cleanArmed){ cleanArmed=true; b.textContent=t('Toucher encore pour confirmer'); b.className='btn rose block';
+          cleanT=setTimeout(function(){ cleanArmed=false; b.textContent=t('Effacer les tâches terminées'); b.className='btn ghost block'; },3000); return; }
+        clearTimeout(cleanT); cleanArmed=false; b.textContent=t('Effacer les tâches terminées'); b.className='btn ghost block';
+        var before=S.tasks.length; S.tasks=S.tasks.filter(function(z){return !z.done;});
+        renderLists(); save(true); toast(t('{n} tâche(s) effacée(s) ✿',{n:before-S.tasks.length})); return;
+    }
+  });
+
+  function doAdd(cat){
+    var inp=$('#in-'+cat), extra=null;
+    if(cat==='deleg'){ extra={who:($('#in-who').value||'').trim()}; }
+    if(cat==='week'){ extra={day:$('#in-day').value||'Flexible'}; }
+    if(addTask(cat,inp.value,extra)){
+      inp.value=''; if(cat==='deleg') $('#in-who').value='';
+      renderLists(); save(); inp.focus();
+    } else { inp.focus(); }
+  }
+
+  document.addEventListener('keydown', function(e){
+    var el=e.target; if(e.key!=='Enter' || !el.getAttribute) return;
+    var c=el.getAttribute('data-enter'); if(!c) return; e.preventDefault();
+    if(c==='kid') kidAdd(); else if(c==='kev') kevAdd(); else if(c==='dt') dtAdd(); else doAdd(c);
+  });
+
+  document.addEventListener('input', function(e){
+    var el=e.target;
+    if(el.hasAttribute('data-name')){ S.name=el.value; setName(); save(); }
+    else if(el.hasAttribute('data-draft')){ S.draft=el.value; save(true); }
+    else if(el.hasAttribute('data-ev')){ ev()[el.getAttribute('data-ev')]=el.value; save(); }
+    else if(el.hasAttribute('data-rs')){ rs()[el.getAttribute('data-rs')]=el.value; save(); }
+    else if(el.hasAttribute('data-who')){ var x=find(el.getAttribute('data-who')); if(x){ x.who=el.value; save(); } }
+    else if(el.hasAttribute('data-kf')) kidField(el);
+  });
+  function kidField(el){ var k=curKid(), f=el.getAttribute('data-kf'); if(!k) return; k[f]=el.value; save(); if(f==='name'||f==='birth') renderKidTabs(); }
+  document.addEventListener('change', function(e){
+    var el=e.target;
+    if(el.id==='importFile' && el.files && el.files[0]){
+      try{ var r=new FileReader(); r.onload=function(){ $('#importText').value=r.result; toast(t('Fichier chargé : touche « Restaurer »')); }; r.readAsText(el.files[0]); }catch(err){ toast(t('Lecture impossible : colle le code')); }
+      el.value=''; return;
+    }
+    if(el.hasAttribute && el.hasAttribute('data-kf')) kidField(el);
+  });
+
+  function setName(){ var n=(S.name||'').trim(); $('#hiName').textContent = n ? (LANG==='ar'?'، ':', ')+n : ''; }
+
+  /* ---------- Guide de bienvenue ---------- */
+  var onbI=0;
+  function onbStep(i){
+    onbI=i;
+    $$('.onb-slide').forEach(function(s){ s.className='onb-slide'+(+s.getAttribute('data-s')===i?' on':''); });
+    $$('#onbDots span').forEach(function(s,j){ s.className=j===i?'on':''; });
+    $('#onbNext').textContent = i<3 ? t('Suivant') : t('Commencer');
+  }
+  function onbEnd(){ $('#onb').style.display='none'; S.onboarded=true; save(true); go('home'); }
+
+  /* ---------- Initialisation ---------- */
+  function init(){
+    var now=new Date();
+    var ds=frDate(now,{weekday:'long',day:'numeric',month:'long'});
+    $('#today').textContent=ds; $('#soirDate').textContent=t('Ce soir · {d}',{d:ds});
+    var wk=wkey().split('-');
+    $('#wkLabel').textContent=t('Semaine du {d}',{d:frDate(new Date(+wk[0],+wk[1]-1,+wk[2]),{day:'numeric',month:'long'})});
+    var dayIdx=(now.getDay()+6)%7;
+    $('#in-day').innerHTML=DAYS.map(function(d,i){ return '<option value="'+d+'"'+(i===dayIdx?' selected':'')+'>'+t(d)+'</option>'; }).join('');
+    var start=new Date(now.getFullYear(),0,0), doy=Math.floor((now-start)/864e5);
+    $('#quote').textContent='« '+t(QUOTES[doy%QUOTES.length])+' »';
+    $('#footYear').textContent=now.getFullYear();
+    $('#nameIn').value=S.name; setName();
+    $('#dumpIn').value=S.draft||'';
+    renderAll(); renderEvening(true); renderReset(true);
+  }
+  try{ collectStatic(); setLang(S.lang||detectLang()); init(); onbStep(0); if(!S.onboarded) $('#onb').style.display='flex'; }catch(err){ var sp=document.getElementById('splash'); if(sp) sp.className='hide'; if(window.console) console.error(err); }
+})();
+</script>
+<script>window.__ayaLoaded=1;(function(){var g=document.getElementById("aya-guard");if(g&&g.parentNode)g.parentNode.removeChild(g);})();</script>
+</body>
+</html>
